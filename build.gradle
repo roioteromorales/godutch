@@ -2,13 +2,35 @@ group 'com.roisoftstudio.ms'
 version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
+apply plugin: 'com.bmuschko.docker-remote-api'
 
-sourceCompatibility = 1.5
+dependencies {
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
+buildscript {
+    repositories {
+        jcenter()
+    }
+
+    dependencies {
+        classpath 'com.bmuschko:gradle-docker-plugin:2.6.5'
+    }
+}
 
 repositories {
     mavenCentral()
 }
 
-dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
+
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+docker {
+    url = 'tcp://192.168.99.100:2376'
+ //   dockerHost  = System.env.DOCKER_HOST
+}
+
+task buildImage(type: DockerBuildImage) {
+    println 'buildImage'
+    inputDir = project.file('src/main/resources/')
+    tag =  'godutch'
 }
