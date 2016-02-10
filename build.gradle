@@ -3,6 +3,7 @@ version '1.0-SNAPSHOT'
 
 apply plugin: 'java'
 apply plugin: 'com.bmuschko.docker-remote-api'
+apply plugin: 'war'
 
 repositories {
     mavenCentral()
@@ -10,9 +11,13 @@ repositories {
 
 dependencies {
     testCompile group: 'junit', name: 'junit', version: '4.11'
+    testCompile 'com.jayway.restassured:rest-assured:2.8.0'
+
+    compile 'com.sun.jersey:jersey-server:1.13'
+    compile 'com.sun.jersey:jersey-core:1.13'
+    compile 'com.sun.jersey:jersey-servlet:1.13'
 
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
-
 }
 
 buildscript {
