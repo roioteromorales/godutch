@@ -34,12 +34,12 @@ import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
 
 docker {
-    url = host
+    url=host
 }
 
 task buildMyAppImage(type: DockerBuildImage) {
-    inputDir = project.file('src/main/resources/')
-    tag =  'godutch'
+    inputDir = file('src/main/resources/')
+    tag = 'test/myapp'
 }
 
 task createMyAppContainer(type: DockerCreateContainer) {
@@ -61,5 +61,3 @@ task functionalTestMyApp(type: Test) {
     dependsOn startMyAppContainer
     //finalizedBy stopMyAppContainer
 }
-
-

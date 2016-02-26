@@ -1,8 +1,5 @@
 import org.junit.Test;
 
-/**
- * Created by Roi on 08-Feb-16.
- */
 public class Test1 {
 
 
@@ -11,5 +8,10 @@ public class Test1 {
         System.out.println("********************************************");
         System.out.println("Building tests");
         System.out.println("********************************************");
+    }
+
+    @Test
+    public void testName2() throws Exception {
+//        fail();
     }
 }
