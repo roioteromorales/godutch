@@ -1,9 +1,15 @@
+sudo: required
+
 language: java
+
+services:
+  - docker
 
 before_install:
 install: ./gradlew build -Phost=127.0.0.1 --stacktrace --info
+
 before_script: 
-script: 
-after_success: 
+script: docker build -t rss/godutch .
+after_success: docker run rss/godutch
 after_failure: 
 after_script: 
