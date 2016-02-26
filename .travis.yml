@@ -1,7 +1,7 @@
 language: java
 
 before_install:
-install: ./gradlew build -Phost=127.0.0.1 --stacktrace --info
+install: ./gradlew build runDocker -Phost=127.0.0.1 --stacktrace --info
 before_script: 
 script: 
 after_success: 
