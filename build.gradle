@@ -34,7 +34,7 @@ import com.bmuschko.gradle.docker.tasks.container.*
 import com.bmuschko.gradle.docker.tasks.image.*
 
 docker {
-    url = "127.0.0.1"
+    url = host
 }
 
 task buildMyAppImage(type: DockerBuildImage) {
