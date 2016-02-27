@@ -37,38 +37,36 @@ import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
 apply plugin: 'com.bmuschko.docker-remote-api'
 
+//You need to define on the running machine the environment variables
+//DOCKER_HOST = tcp://192.168.99.100:2376  (windows)
+//DOCKER_CERT_PATH = C:\Users\Roi\.docker\machine\machines\default (windows)
 docker {
     url = System.getenv().DOCKER_HOST.replace("tcp", "https")
     certPath = new File(System.getenv().DOCKER_CERT_PATH)
 }
 
 task buildImage(type: DockerBuildImage) {
-    dependsOn assemble
     inputDir = project.rootDir
     tag = "godutch"
 }
 
-task buildMyAppImage(type: DockerBuildImage) {
-    inputDir = file('src/main/resources/')
-    tag = 'test/myapp'
-}
-
-task createMyAppContainer(type: DockerCreateContainer) {
-    dependsOn buildMyAppImage
-    targetImageId { buildMyAppImage.getImageId() }
+task createContainer(type: DockerCreateContainer) {
+    dependsOn buildImage
+    targetImageId { buildImage.getImageId() }
     portBindings = ['8080:8080']
 }
 
-task startMyAppContainer(type: DockerStartContainer) {
-    dependsOn createMyAppContainer
-    targetContainerId { createMyAppContainer.getContainerId() }
+task startContainer(type: DockerStartContainer) {
+    dependsOn createContainer
+    targetContainerId { createContainer.getContainerId() }
 }
 
-task stopMyAppContainer(type: DockerStopContainer) {
-    targetContainerId { createMyAppContainer.getContainerId() }
+task stopContainer(type: DockerStopContainer) {
+    targetContainerId { createContainer.getContainerId() }
 }
 
-task functionalTestMyApp(type: Test) {
-    dependsOn startMyAppContainer
-    //finalizedBy stopMyAppContainer
+task functionalTest(type: Test) {
+    dependsOn startContainer
+    println "Start my functional Tests on the container"
+    finalizedBy stopContainer
 }
