@@ -1,1 +1,1 @@
-# godutch
+# GoDutch The payment tracking application
