@@ -29,39 +29,44 @@ buildscript {
         classpath 'com.bmuschko:gradle-docker-plugin:2.6.5'
     }
 }
-task runDocker(type:Exec) {
-    println "ola"
-    commandLine "docker build ."
+
+import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
+import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
+import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
+
+apply plugin: 'com.bmuschko.docker-remote-api'
+
+//You need to define on the running machine the environment variables
+//DOCKER_HOST = tcp://192.168.99.100:2376  (windows)
+//DOCKER_CERT_PATH = C:\Users\Roi\.docker\machine\machines\default (windows)
+docker {
+    url = System.getenv().DOCKER_HOST.replace("tcp", "https")
+    certPath = new File(System.getenv().DOCKER_CERT_PATH)
 }
 
+task buildImage(type: DockerBuildImage) {
+    inputDir = project.rootDir
+    tag = "godutch"
+}
 
-//docker {
-//    url = "127.0.0.1"
-//}
-//
-//task buildMyAppImage(type: DockerBuildImage) {
-//    inputDir = project.file('src/main/resources/')
-//    tag =  'godutch'
-//}
-//
-//task createMyAppContainer(type: DockerCreateContainer) {
-//    dependsOn buildMyAppImage
-//    targetImageId { buildMyAppImage.getImageId() }
-//    portBindings = ['8080:8080']
-//}
-//
-//task startMyAppContainer(type: DockerStartContainer) {
-//    dependsOn createMyAppContainer
-//    targetContainerId { createMyAppContainer.getContainerId() }
-//}
-//
-//task stopMyAppContainer(type: DockerStopContainer) {
-//    targetContainerId { createMyAppContainer.getContainerId() }
-//}
-//
-//task functionalTestMyApp(type: Test) {
-//    dependsOn startMyAppContainer
-//    //finalizedBy stopMyAppContainer
-//}
-//
-//
+task createContainer(type: DockerCreateContainer) {
+    dependsOn buildImage
+    targetImageId { buildImage.getImageId() }
+    portBindings = ['8080:8080']
+}
+
+task startContainer(type: DockerStartContainer) {
+    dependsOn createContainer
+    targetContainerId { createContainer.getContainerId() }
+}
+
+task stopContainer(type: DockerStopContainer) {
+    targetContainerId { createContainer.getContainerId() }
+}
+
+task functionalTest(type: Test) {
+    dependsOn startContainer
+    println "Start my functional Tests on the container"
+    finalizedBy stopContainer
+}

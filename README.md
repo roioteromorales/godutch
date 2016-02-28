@@ -1,3 +1,2 @@
-# godutch
-Editando con pull request
-ofofofo
+# GoDutch The payment tracking application
+Testing pullrequest

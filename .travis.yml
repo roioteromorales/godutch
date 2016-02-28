@@ -6,10 +6,10 @@ services:
   - docker
 
 before_install:
-install: ./gradlew build -Phost=127.0.0.1 --stacktrace --info
+install: ./gradlew build -Phost="http://127.0.0.1:4243" --stacktrace --info
 
 before_script:
 script: docker build -t rss/godutch .
 after_success: docker run rss/godutch
-after_failure: 
-after_script: 
+after_failure:
+after_script:
