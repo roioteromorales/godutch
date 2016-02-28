@@ -52,8 +52,8 @@ task buildImage(type: DockerBuildImage) {
 
 task createContainer(type: DockerCreateContainer) {
     dependsOn buildImage
-    targetImageId { buildImage.getImageId() }
-    portBindings = ['8080:8080']
+    targetImageId { "godutch:" + buildImage.getImageId() }
+    portBindings = ['18080:8080']
 }
 
 task startContainer(type: DockerStartContainer) {
