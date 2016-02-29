@@ -1,5 +1,5 @@
 group 'com.roisoftstudio.godutch'
-version '1.0'
+version '0.1'
 
 apply plugin: 'java'
 apply plugin: 'com.bmuschko.docker-remote-api'
