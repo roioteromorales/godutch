@@ -30,6 +30,11 @@ buildscript {
     }
 }
 
+def dockerHost = System.getenv().DOCKER_HOST
+def dockerCertPath = System.getenv().DOCKER_CERT_PATH
+def tomcatExternalPort = "18080"
+def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/godutch-1.0/"
+
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
@@ -41,8 +46,8 @@ apply plugin: 'com.bmuschko.docker-remote-api'
 //DOCKER_HOST = tcp://192.168.99.100:2376  (windows)
 //DOCKER_CERT_PATH = C:\Users\Roi\.docker\machine\machines\default (windows)
 docker {
-    url = System.getenv().DOCKER_HOST.replace("tcp", "https")
-    certPath = new File(System.getenv().DOCKER_CERT_PATH)
+    url = dockerHost.replace("tcp", "https")
+    certPath = new File(dockerCertPath)
 }
 
 task buildImage(type: DockerBuildImage) {
@@ -53,12 +58,13 @@ task buildImage(type: DockerBuildImage) {
 task createContainer(type: DockerCreateContainer) {
     dependsOn buildImage
     targetImageId { "godutch:" + buildImage.getImageId() }
-    portBindings = ['18080:8080']
+    portBindings = [tomcatExternalPort + ':8080']
 }
 
 task startContainer(type: DockerStartContainer) {
     dependsOn createContainer
     targetContainerId { createContainer.getContainerId() }
+    println "Application running on: " + containerUrl
 }
 
 task stopContainer(type: DockerStopContainer) {
