@@ -1,5 +1,7 @@
+def vrs = 0.1
+
 group 'com.roisoftstudio.godutch'
-version '0.1'
+version vrs
 
 apply plugin: 'java'
 apply plugin: 'com.bmuschko.docker-remote-api'
@@ -16,8 +18,12 @@ dependencies {
     compile 'com.sun.jersey:jersey-server:1.13'
     compile 'com.sun.jersey:jersey-core:1.13'
     compile 'com.sun.jersey:jersey-servlet:1.13'
+    compile 'com.fasterxml.jackson.core:jackson-core:2.7.2'
+    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.2'
+
 
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
+
 }
 
 buildscript {
@@ -33,14 +39,12 @@ buildscript {
 def dockerHost = System.getenv().DOCKER_HOST
 def dockerCertPath = System.getenv().DOCKER_CERT_PATH
 def tomcatExternalPort = "18080"
-def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/godutch-1.0/"
+def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/godutch-" + vrs
 
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
-
-apply plugin: 'com.bmuschko.docker-remote-api'
 
 //You need to define on the running machine the environment variables
 //DOCKER_HOST = tcp://192.168.99.100:2376  (windows)
@@ -73,6 +77,5 @@ task stopContainer(type: DockerStopContainer) {
 
 task functionalTest(type: Test) {
     dependsOn startContainer
-    println "Start my functional Tests on the container"
     finalizedBy stopContainer
 }
