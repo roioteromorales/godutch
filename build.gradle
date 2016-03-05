@@ -16,6 +16,7 @@ dependencies {
     compile 'com.sun.jersey:jersey-server:1.13'
     compile 'com.sun.jersey:jersey-core:1.13'
     compile 'com.sun.jersey:jersey-servlet:1.13'
+    compile 'org.mongodb:mongo-java-driver:3.2.2'
 
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
 }
@@ -33,7 +34,7 @@ buildscript {
 def dockerHost = System.getenv().DOCKER_HOST
 def dockerCertPath = System.getenv().DOCKER_CERT_PATH
 def tomcatExternalPort = "18080"
-def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/godutch-1.0/"
+def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/godutch-" + version + "/"
 
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
@@ -50,29 +51,39 @@ docker {
     certPath = new File(dockerCertPath)
 }
 
-task buildImage(type: DockerBuildImage) {
+task buildAppImage(type: DockerBuildImage) {
     inputDir = project.rootDir
-    tag = "godutch"
+    tag = "godutch-app"
+}
+task buildDbImage(type: DockerBuildImage) {
+    inputDir = project.rootDir
+    tag = "godutch-db"
 }
 
-task createContainer(type: DockerCreateContainer) {
-    dependsOn buildImage
-    targetImageId { "godutch:" + buildImage.getImageId() }
+task createAppContainer(type: DockerCreateContainer) {
+    dependsOn buildAppImage
+    targetImageId { "godutch:" + buildAppImage.getImageId() }
     portBindings = [tomcatExternalPort + ':8080']
 }
 
-task startContainer(type: DockerStartContainer) {
-    dependsOn createContainer
-    targetContainerId { createContainer.getContainerId() }
+task createDBContainer(type: DockerCreateContainer) {
+    dependsOn buildAppImage
+    targetImageId { "godutch:" + buildAppImage.getImageId() }
+    portBindings = [tomcatExternalPort + ':8080']
+}
+
+task startAppContainer(type: DockerStartContainer) {
+    dependsOn createAppContainer
+    targetContainerId { createAppContainer.getContainerId() }
     println "Application running on: " + containerUrl
 }
 
-task stopContainer(type: DockerStopContainer) {
-    targetContainerId { createContainer.getContainerId() }
+task stopAppContainer(type: DockerStopContainer) {
+    targetContainerId { createAppContainer.getContainerId() }
 }
 
 task functionalTest(type: Test) {
-    dependsOn startContainer
+    dependsOn startAppContainer
     println "Start my functional Tests on the container"
-    finalizedBy stopContainer
+    finalizedBy stopAppContainer
 }
