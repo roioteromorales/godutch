@@ -33,7 +33,7 @@ buildscript {
 def dockerHost = System.getenv().DOCKER_HOST
 def dockerCertPath = System.getenv().DOCKER_CERT_PATH
 def tomcatExternalPort = "18080"
-def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/godutch-1.0/"
+def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/godutch-" + version + "/"
 
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
