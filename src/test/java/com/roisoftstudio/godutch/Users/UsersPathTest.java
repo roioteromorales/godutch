@@ -1,4 +1,4 @@
-package com.roisoftstudio.godutch.Users;
+package com.roisoftstudio.godutch.users;
 
 import org.junit.Test;
 

@@ -1,4 +1,4 @@
-package com.roisoftstudio.godutch.Users;
+package com.roisoftstudio.godutch.users;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;
@@ -9,7 +9,7 @@ public class UsersPath {
 
     @GET
     public Response getAllUsers() {
-        return Response.ok("Hi!").build();
+        return Response.ok(new UsersService().getAllUsers()).build();
     }
 
 }
