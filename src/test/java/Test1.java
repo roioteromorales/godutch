@@ -10,8 +10,5 @@ public class Test1 {
         System.out.println("********************************************");
     }
 
-    @Test
-    public void testName2() throws Exception {
-//        fail();
-    }
+
 }

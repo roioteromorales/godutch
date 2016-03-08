@@ -31,9 +31,14 @@ buildscript {
     }
 }
 
+test {
+    exclude '**/integration/**'
+}
+
 def dockerHost = System.getenv().DOCKER_HOST
 def dockerCertPath = System.getenv().DOCKER_CERT_PATH
 def tomcatExternalPort = "18080"
+def mongodbExternalPort = "27017"
 def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/godutch-" + version + "/"
 
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
@@ -43,32 +48,43 @@ import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
 apply plugin: 'com.bmuschko.docker-remote-api'
 
-//You need to define on the running machine the environment variables
-//DOCKER_HOST = tcp://192.168.99.100:2376  (windows)
-//DOCKER_CERT_PATH = C:\Users\Roi\.docker\machine\machines\default (windows)
+// You need to define on the running machine the environment variables
+// DOCKER_HOST = tcp://192.168.99.100:2376  (windows)
+// DOCKER_CERT_PATH = C:/users/Roi/.docker/machine/machines/default (windows)
+
 docker {
     url = dockerHost.replace("tcp", "https")
     certPath = new File(dockerCertPath)
 }
 
+task buildDBImage(type: DockerBuildImage) {
+    inputDir = new File("db/")
+    println project.absoluteProjectPath("db/")
+    tag = "godutch-db"
+}
+task createDBContainer(type: DockerCreateContainer) {
+    dependsOn buildDBImage
+    targetImageId { "godutch-db:" + buildDBImage.getImageId() }
+    portBindings = [mongodbExternalPort + ':27017']
+}
+task startDBContainer(type: DockerStartContainer) {
+    dependsOn createDBContainer
+    targetContainerId { createDBContainer.getContainerId() }
+}
+task stopDBContainer(type: DockerStopContainer) {
+    targetContainerId { createDBContainer.getContainerId() }
+}
+
+/////////////////////////////////////////////////////////////
+
 task buildAppImage(type: DockerBuildImage) {
     inputDir = project.rootDir
     tag = "godutch-app"
 }
-task buildDbImage(type: DockerBuildImage) {
-    inputDir = project.rootDir
-    tag = "godutch-db"
-}
 
 task createAppContainer(type: DockerCreateContainer) {
     dependsOn buildAppImage
-    targetImageId { "godutch:" + buildAppImage.getImageId() }
-    portBindings = [tomcatExternalPort + ':8080']
-}
-
-task createDBContainer(type: DockerCreateContainer) {
-    dependsOn buildAppImage
-    targetImageId { "godutch:" + buildAppImage.getImageId() }
+    targetImageId { "godutch-app:" + buildAppImage.getImageId() }
     portBindings = [tomcatExternalPort + ':8080']
 }
 
@@ -84,6 +100,8 @@ task stopAppContainer(type: DockerStopContainer) {
 
 task functionalTest(type: Test) {
     dependsOn startAppContainer
-    println "Start my functional Tests on the container"
+    dependsOn startDBContainer
+    include '**/integration/**'
+    finalizedBy stopDBContainer
     finalizedBy stopAppContainer
 }

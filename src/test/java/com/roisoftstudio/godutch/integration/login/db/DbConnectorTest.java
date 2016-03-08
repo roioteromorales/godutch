@@ -1,4 +1,4 @@
-package com.roisoftstudio.godutch.db;
+package com.roisoftstudio.godutch.integration.login.db;
 
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
@@ -14,10 +14,12 @@ import java.util.Locale;
 import static java.util.Arrays.asList;
 
 public class DbConnectorTest {
+
+
     @Test
     public void testName() throws Exception {
-        MongoClient mongoClient = new MongoClient("192.168.99.100", 27017);
-//        MongoClient mongoClient = new MongoClient("localhost", 27017);
+        String docker_host = System.getenv("DOCKER_HOST").split(":")[1].substring(2);
+        MongoClient mongoClient = new MongoClient(docker_host, 27017);
 
         MongoDatabase db = mongoClient.getDatabase("test");
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
