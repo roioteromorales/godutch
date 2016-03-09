@@ -3,7 +3,9 @@ package com.roisoftstudio.godutch.integration.login.db;
 import com.mongodb.MongoClient;
 import com.mongodb.client.MongoCollection;
 import com.mongodb.client.MongoDatabase;
+import com.roisoftstudio.godutch.login.db.DbConnector;
 import org.bson.Document;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.text.DateFormat;
@@ -13,14 +15,15 @@ import java.util.Locale;
 
 import static java.util.Arrays.asList;
 
+@Ignore
 public class DbConnectorTest {
 
 
     @Test
-    public void testName() throws Exception {
-        String docker_host = System.getenv("DOCKER_HOST").split(":")[1].substring(2);
-        MongoClient mongoClient = new MongoClient(docker_host, 27017);
+    public void DbConnector_shouldConnectToMongoContainer() throws Exception {
+        DbConnector dbConnector = new DbConnector();
 
+        MongoClient mongoClient = dbConnector.getMongoClient();
         MongoDatabase db = mongoClient.getDatabase("test");
         DateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.ENGLISH);
 

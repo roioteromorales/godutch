@@ -1,22 +1,20 @@
 package com.roisoftstudio.godutch.login.db;
 
 import com.mongodb.MongoClient;
-import com.mongodb.client.MongoDatabase;
 
 public class DbConnector {
 
-    private MongoClient mongo;
+    private MongoClient mongoClient;
 
     public DbConnector() {
     }
 
     public void connect(){
-        mongo = new MongoClient( "localhost" , 27017 );
+        String docker_host = System.getenv("DOCKER_HOST").split(":")[1].substring(2);
+        mongoClient = new MongoClient(docker_host, 27017);
+    }
 
-        MongoDatabase db = mongo.getDatabase("database name");
-
-
-
-
+    public MongoClient getMongoClient() {
+        return mongoClient;
     }
 }
