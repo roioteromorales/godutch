@@ -1,5 +1,6 @@
 package com.roisoftstudio.godutch.login.db.dao;
 
+import com.google.inject.Inject;
 import com.roisoftstudio.godutch.login.exceptions.UserAlreadyExistsException;
 import com.roisoftstudio.godutch.login.model.User;
 
@@ -9,6 +10,7 @@ import java.util.Map;
 public class InMemoryUserDao implements UserDao {
     private final Map<String, String> userList;
 
+    @Inject
     public InMemoryUserDao() {
         userList = new HashMap<>();
     }
