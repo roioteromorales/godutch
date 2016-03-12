@@ -14,4 +14,9 @@ public class MongoDbUserDao implements UserDao {
         //// TODO: 09-Mar-16
         return false;
     }
+
+    @Override
+    public User findByEmail(String userEmail) {
+        return null;
+    }
 }

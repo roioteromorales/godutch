@@ -1,6 +1,7 @@
 package com.roisoftstudio.godutch.login.services;
 
 import com.roisoftstudio.godutch.login.db.dao.UserDao;
+import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
 import com.roisoftstudio.godutch.login.exceptions.UserAlreadyExistsException;
 import com.roisoftstudio.godutch.login.model.User;
 import org.junit.Before;
@@ -38,9 +39,9 @@ public class DefaultSignServiceTest {
         assertThat(signService.isSignedIn(token), is(true));
     }
 
-    @Test(expected = UserAlreadyExistsException.class)
+    @Test(expected = SignServiceException.class)
     public void signUp_shouldShouldFailIfUserExists() throws Exception {
-        doNothing().doThrow(new UserAlreadyExistsException()).when(userDao).addUser(any(User.class));
+        doNothing().doThrow(new UserAlreadyExistsException("Error ")).when(userDao).addUser(any(User.class));
 
         signService.signUp("user", "email");
         signService.signUp("user", "email");
