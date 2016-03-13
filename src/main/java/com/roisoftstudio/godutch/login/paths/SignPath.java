@@ -23,7 +23,7 @@ public class SignPath {
     public Response signUp(@FormParam("email") String email, @FormParam("password") String password) {
         String token;
         try {
-            token = signService.signUp(email, password);
+            token = signService.signUp(getOrDefault(email), getOrDefault(password));
         } catch (SignServiceException e) {
             logger.error("An error occurred while signing in. ", e);
             return Response.status(Response.Status.CONFLICT).build();
@@ -34,13 +34,17 @@ public class SignPath {
                         "Registered Successfully. Your session token is: " + token).build();
 
     }
+    //find out @default value for parameters annotation to remove this
+    private String getOrDefault(String string) {
+        return string != null ? string : "DEFAULTVALUE";
+    }
 
     @POST
     @Path("/in")
     public Response signIn(@FormParam("token") String token) {
-        if(signService.isSignedIn(token)){
+        if (signService.isSignedIn(token)) {
             return Response.ok("You are Signed in.").build();
-        }else{
+        } else {
             return Response.ok("Your token is invalid: " + token).build();
         }
 
