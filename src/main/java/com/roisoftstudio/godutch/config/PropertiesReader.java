@@ -14,7 +14,6 @@ public class PropertiesReader {
 
     private void initPropertiesFromFile(String propertiesFile) {
         String filePath =  Thread.currentThread().getContextClassLoader().getResource(propertiesFile).getFile();
-        System.out.println("Path to search for file properties: " + filePath);
         File file = new File(filePath);
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
             properties.load(fileInputStream);
