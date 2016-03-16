@@ -12,18 +12,33 @@ repositories {
 }
 
 dependencies {
-    testCompile group: 'junit', name: 'junit', version: '4.11'
-    testCompile 'com.jayway.restassured:rest-assured:2.8.0'
-
     compile 'com.sun.jersey:jersey-server:1.13'
     compile 'com.sun.jersey:jersey-core:1.13'
     compile 'com.sun.jersey:jersey-servlet:1.13'
-    compile 'com.fasterxml.jackson.core:jackson-core:2.7.2'
-    compile 'com.fasterxml.jackson.core:jackson-databind:2.7.2'
+    compile 'com.sun.jersey:jersey-json:1.19'
 
+//    compile 'org.glassfish.jersey.core:jersey-client:2.22.2'
+//    compile 'org.glassfish.jersey.containers:jersey-container-servlet:2.22.2'
+//    compile 'javax.servlet:javax.servlet-api:3.1.0'
+
+    compile 'org.mongodb:mongo-java-driver:3.2.2'
+    compile 'org.apache.logging.log4j:log4j-core:2.5'
 
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
 
+    compile 'com.google.inject:guice-parent:4.0'
+    compile 'com.google.inject.extensions:guice-servlet:4.0'
+//    compile 'com.squarespace.jersey2-guice:jersey2-guice:0.10'
+
+    compile 'io.jsonwebtoken:jjwt:0.6.0'
+    compile 'org.apache.logging.log4j:log4j-core:2.5'
+
+
+    testCompile 'org.hamcrest:hamcrest-all:1.3'
+    testCompile 'org.mockito:mockito-all:2.0.2-beta'
+    testCompile 'junit:junit:4.12'
+    testCompile 'com.sun.jersey.jersey-test-framework:jersey-test-framework-core:1.19'
+    testCompile 'com.sun.jersey.jersey-test-framework:jersey-test-framework-external:1.19'
 }
 
 buildscript {
@@ -36,46 +51,82 @@ buildscript {
     }
 }
 
+test {
+    exclude '**/integration/**'
+}
+
 def dockerHost = System.getenv().DOCKER_HOST
 def dockerCertPath = System.getenv().DOCKER_CERT_PATH
 def tomcatExternalPort = "18080"
-def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/godutch-" + vrs
+def mongodbExternalPort = "27017"
+def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/godutch-" + version + "/"
 
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStopContainer
 import com.bmuschko.gradle.docker.tasks.image.DockerBuildImage
 
-//You need to define on the running machine the environment variables
-//DOCKER_HOST = tcp://192.168.99.100:2376  (windows)
-//DOCKER_CERT_PATH = C:\Users\Roi\.docker\machine\machines\default (windows)
+apply plugin: 'com.bmuschko.docker-remote-api'
+
+// You need to define on the running machine the environment variables
+// DOCKER_HOST = tcp://192.168.99.100:2376  (windows)
+// DOCKER_CERT_PATH = C:/users/Roi/.docker/machine/machines/default (windows)
+
 docker {
     url = dockerHost.replace("tcp", "https")
     certPath = new File(dockerCertPath)
 }
 
-task buildImage(type: DockerBuildImage) {
-    inputDir = project.rootDir
-    tag = "godutch"
+task buildDBImage(type: DockerBuildImage) {
+    inputDir = new File("db/")
+    println project.absoluteProjectPath("db/")
+    tag = "godutch-db"
+}
+task createDBContainer(type: DockerCreateContainer) {
+    dependsOn buildDBImage
+    targetImageId { "godutch-db:" + buildDBImage.getImageId() }
+    portBindings = [mongodbExternalPort + ':27017']
+}
+task startDBContainer(type: DockerStartContainer) {
+    dependsOn createDBContainer
+    targetContainerId { createDBContainer.getContainerId() }
+}
+task stopDBContainer(type: DockerStopContainer) {
+    targetContainerId { createDBContainer.getContainerId() }
 }
 
-task createContainer(type: DockerCreateContainer) {
-    dependsOn buildImage
-    targetImageId { "godutch:" + buildImage.getImageId() }
+/////////////////////////////////////////////////////////////
+
+task buildAppImage(type: DockerBuildImage) {
+    inputDir = project.rootDir
+    tag = "godutch-app"
+}
+
+task createAppContainer(type: DockerCreateContainer) {
+    dependsOn buildAppImage
+    targetImageId { "godutch-app:" + buildAppImage.getImageId() }
     portBindings = [tomcatExternalPort + ':8080']
 }
 
-task startContainer(type: DockerStartContainer) {
-    dependsOn createContainer
-    targetContainerId { createContainer.getContainerId() }
-    println "Application running on: " + containerUrl
+task startAppContainer(type: DockerStartContainer) {
+    dependsOn createAppContainer
+    targetContainerId { createAppContainer.getContainerId() }
 }
 
-task stopContainer(type: DockerStopContainer) {
-    targetContainerId { createContainer.getContainerId() }
+task stopAppContainer(type: DockerStopContainer) {
+    targetContainerId { createAppContainer.getContainerId() }
 }
 
 task functionalTest(type: Test) {
-    dependsOn startContainer
-    finalizedBy stopContainer
+    dependsOn startAppContainer
+    dependsOn startDBContainer
+    include '**/integration/**'
+    finalizedBy stopDBContainer
+    finalizedBy stopAppContainer
+}
+
+task startGoDutch() {
+    dependsOn startAppContainer
+    dependsOn startDBContainer
+    println "Application running on: " + containerUrl \
 }
