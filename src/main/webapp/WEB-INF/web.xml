@@ -6,9 +6,6 @@
     <servlet>
         <servlet-name>Jersey</servlet-name>
         <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
-
-        <!-- the following is only needed if you want to use the built-in support
-        for mapping pojo objects to json. -->
         <init-param>
             <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
             <param-value>true</param-value>
@@ -20,4 +17,18 @@
         <servlet-name>Jersey</servlet-name>
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
+
+    <!--<listener>-->
+        <!--<listener-class>com.roisoftstudio.godutch.MyGuiceServletContextListener</listener-class>-->
+    <!--</listener>-->
+
+    <!--<filter>-->
+        <!--<filter-name>guiceFilter</filter-name>-->
+        <!--<filter-class>com.google.inject.servlet.GuiceFilter</filter-class>-->
+    <!--</filter>-->
+
+    <!--<filter-mapping>-->
+        <!--<filter-name>guiceFilter</filter-name>-->
+        <!--<url-pattern>/*</url-pattern>-->
+    <!--</filter-mapping>-->
 </web-app>
