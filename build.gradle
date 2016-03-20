@@ -1,5 +1,7 @@
+def vrs = 0.1
+
 group 'com.roisoftstudio.godutch'
-version '0.1'
+version vrs
 
 apply plugin: 'java'
 apply plugin: 'com.bmuschko.docker-remote-api'
@@ -37,7 +39,6 @@ dependencies {
     testCompile 'junit:junit:4.12'
     testCompile 'com.sun.jersey.jersey-test-framework:jersey-test-framework-core:1.19'
     testCompile 'com.sun.jersey.jersey-test-framework:jersey-test-framework-external:1.19'
-
 }
 
 buildscript {
@@ -128,5 +129,4 @@ task startGoDutch() {
     dependsOn startAppContainer
     dependsOn startDBContainer
     println "Application running on: " + containerUrl \
-
 }

@@ -1,0 +1,52 @@
+---
+- hosts: all
+  user: vagrant
+
+  tasks:
+   - name: Install Vim editor
+     become: yes
+     apt: name=vim update_cache=yes
+
+   - name: Install Git
+     become: yes
+     apt: name=git update_cache=yes
+
+   - name: Download NodeJS v5
+     get_url: url=https://deb.nodesource.com/setup_5.x dest=./nodejs_5.sh mode=0776
+
+   - name: Install NodeJS v5 (1/2)
+     become: yes
+     command: sh ./nodejs_5.sh
+
+   - name: Install NodeJS v5 (2/2)
+     become: yes
+     apt: name=nodejs install_recommends=yes
+
+   - name: Install Yeoman
+     become: yes
+     npm: name=yo global=yes
+  
+   - name: Install Bower
+     become: yes
+     npm: name=bower global=yes
+
+   - name: Install Grunt-CLI
+     become: yes
+     npm: name=grunt-cli global=yes
+
+   - name: Install Ruby
+     become: yes
+     apt: name=ruby-full
+
+   - name: Install RubyGems
+     become: yes
+     apt: name=rubygems
+
+#  - name: Install Ruby-Compass
+#     become: yes
+#     apt: name=ruby-compass
+
+   - name: Install Compass
+     become: yes
+     command: bash -lc "gem install compass"
+#     gem: name=compass
