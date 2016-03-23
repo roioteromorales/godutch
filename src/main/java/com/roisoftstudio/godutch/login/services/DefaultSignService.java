@@ -8,11 +8,11 @@ import com.roisoftstudio.godutch.login.db.dao.UserDao;
 import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
 import com.roisoftstudio.godutch.login.exceptions.UserAlreadyExistsException;
 import com.roisoftstudio.godutch.login.model.User;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DefaultSignService implements SignService {
-    final Logger logger = LogManager.getLogger(DefaultSignService.class);
+    final Logger logger = LoggerFactory.getLogger(DefaultSignService.class);
 
     private UserDao userDao;
     private final TokenManager tokenManager;
