@@ -18,6 +18,12 @@ public class SignPath {
     //  @Inject
     private SignService signService = new DefaultSignService(new InMemoryUserDao());
 
+    @GET
+    @Path("/help")
+    public Response getHelp() {
+        return Response.ok("This is working").build();
+    }
+
     @PUT
     @Path("/up")
     public Response signUp(@FormParam("email") String email, @FormParam("password") String password) {
@@ -34,6 +40,7 @@ public class SignPath {
                         "Registered Successfully. Your session token is: " + token).build();
 
     }
+
     //find out @default value for parameters annotation to remove this
     private String getOrDefault(String string) {
         return string != null ? string : "DEFAULTVALUE";
