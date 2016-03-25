@@ -5,10 +5,10 @@
     <display-name>GoDutch Application</display-name>
     <servlet>
         <servlet-name>Jersey</servlet-name>
-        <servlet-class>com.sun.jersey.spi.container.servlet.ServletContainer</servlet-class>
+        <servlet-class>org.glassfish.jersey.servlet.ServletContainer</servlet-class>
         <init-param>
-            <param-name>com.sun.jersey.api.json.POJOMappingFeature</param-name>
-            <param-value>true</param-value>
+            <param-name>jersey.config.server.provider.packages</param-name>
+            <param-value>com.roisoftstudio.godutch</param-value>
         </init-param>
         <load-on-startup>1</load-on-startup>
     </servlet>
@@ -18,17 +18,19 @@
         <url-pattern>/*</url-pattern>
     </servlet-mapping>
 
-    <!--<listener>-->
-        <!--<listener-class>com.roisoftstudio.godutch.MyGuiceServletContextListener</listener-class>-->
-    <!--</listener>-->
 
-    <!--<filter>-->
-        <!--<filter-name>guiceFilter</filter-name>-->
-        <!--<filter-class>com.google.inject.servlet.GuiceFilter</filter-class>-->
-    <!--</filter>-->
+    <listener>
+        <listener-class>com.roisoftstudio.godutch.AppContextListener</listener-class>
+    </listener>
 
-    <!--<filter-mapping>-->
-        <!--<filter-name>guiceFilter</filter-name>-->
-        <!--<url-pattern>/*</url-pattern>-->
-    <!--</filter-mapping>-->
+    <filter>
+        <filter-name>guiceFilter</filter-name>
+        <filter-class>com.google.inject.servlet.GuiceFilter</filter-class>
+    </filter>
+
+    <filter-mapping>
+        <filter-name>guiceFilter</filter-name>
+        <url-pattern>/*</url-pattern>
+    </filter-mapping>
+
 </web-app>

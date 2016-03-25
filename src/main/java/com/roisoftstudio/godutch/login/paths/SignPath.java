@@ -1,11 +1,10 @@
 package com.roisoftstudio.godutch.login.paths;
 
-import com.roisoftstudio.godutch.login.db.dao.InMemoryUserDao;
+import com.google.inject.Inject;
 import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
-import com.roisoftstudio.godutch.login.services.DefaultSignService;
 import com.roisoftstudio.godutch.login.services.SignService;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
@@ -13,10 +12,16 @@ import javax.ws.rs.core.Response;
 
 @Path("/sign")
 public class SignPath {
-    final Logger logger = LogManager.getLogger(SignPath.class);
+    final Logger logger = LoggerFactory.getLogger(SignPath.class);
 
-    //  @Inject
-    private SignService signService = new DefaultSignService(new InMemoryUserDao());
+    @Inject
+    private SignService signService; // = new DefaultSignService(new InMemoryUserDao());
+
+    @GET
+    @Path("/help")
+    public Response getHelp() {
+        return Response.ok("This is working").build();
+    }
 
     @PUT
     @Path("/up")
@@ -34,6 +39,7 @@ public class SignPath {
                         "Registered Successfully. Your session token is: " + token).build();
 
     }
+
     //find out @default value for parameters annotation to remove this
     private String getOrDefault(String string) {
         return string != null ? string : "DEFAULTVALUE";

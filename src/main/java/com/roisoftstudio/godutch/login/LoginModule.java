@@ -6,7 +6,7 @@ import com.roisoftstudio.godutch.login.db.dao.UserDao;
 import com.roisoftstudio.godutch.login.services.DefaultSignService;
 import com.roisoftstudio.godutch.login.services.SignService;
 
-public class LoginModule extends AbstractModule {//ServletModule {
+public class LoginModule extends AbstractModule {
 
     @Override
     protected void configure() {
