@@ -25,7 +25,7 @@ dependencies {
     compile 'com.google.inject:guice:4.0'
     compile 'com.google.inject.extensions:guice-servlet:4.0'
 
-    compile 'com.squarespace.jersey2-guice:jersey2-guice:0.10'
+    compile 'com.squarespace.jersey2-guice:jersey2-guice-impl:1.0.6'
 
     compile 'io.jsonwebtoken:jjwt:0.6.0'
 

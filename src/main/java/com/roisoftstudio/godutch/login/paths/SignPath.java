@@ -1,8 +1,7 @@
 package com.roisoftstudio.godutch.login.paths;
 
-import com.roisoftstudio.godutch.login.db.dao.InMemoryUserDao;
+import com.google.inject.Inject;
 import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
-import com.roisoftstudio.godutch.login.services.DefaultSignService;
 import com.roisoftstudio.godutch.login.services.SignService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,8 +14,8 @@ import javax.ws.rs.core.Response;
 public class SignPath {
     final Logger logger = LoggerFactory.getLogger(SignPath.class);
 
-    //  @Inject
-    private SignService signService = new DefaultSignService(new InMemoryUserDao());
+    @Inject
+    private SignService signService; // = new DefaultSignService(new InMemoryUserDao());
 
     @GET
     @Path("/help")
