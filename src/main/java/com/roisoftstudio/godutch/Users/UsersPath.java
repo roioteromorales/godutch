@@ -1,4 +1,4 @@
-package com.roisoftstudio.godutch.users;
+package com.roisoftstudio.godutch.Users;
 
 import javax.ws.rs.GET;
 import javax.ws.rs.Path;

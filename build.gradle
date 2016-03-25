@@ -14,13 +14,9 @@ repositories {
 dependencies {
     compile 'javax.ws.rs:javax.ws.rs-api:2.0.1'
 
-    compile 'org.glassfish.jersey.core:jersey-client:2.11'
-    compile 'org.glassfish.jersey.core:jersey-server:2.11'
-    compile 'org.glassfish.jersey.containers:jersey-container-servlet:2.11'
-
-    compile 'org.glassfish.hk2:guice-bridge:2.5.0-b03'
-
-
+    compile 'org.glassfish.jersey.core:jersey-client:2.22.2'
+    compile 'org.glassfish.jersey.core:jersey-server:2.22.2'
+    compile 'org.glassfish.jersey.containers:jersey-container-servlet:2.22.2'
 
     compile 'javax.servlet:javax.servlet-api:3.1.0'
 

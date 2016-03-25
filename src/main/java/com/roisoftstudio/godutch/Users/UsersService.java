@@ -1,4 +1,4 @@
-package com.roisoftstudio.godutch.users;
+package com.roisoftstudio.godutch.Users;
 
 public class UsersService {
     private String allUsers;
