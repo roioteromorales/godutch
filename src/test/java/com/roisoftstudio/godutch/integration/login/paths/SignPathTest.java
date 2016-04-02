@@ -17,6 +17,6 @@ public class SignPathTest {
         System.out.println("URL: " + CONTAINER_URL);
 
         String response = HttpRequest.get(CONTAINER_URL + "sign/help").body();
-        assertThat(response).isEqualTo("This is working1");
+        assertThat(response).isEqualTo("This is working");
     }
 }
