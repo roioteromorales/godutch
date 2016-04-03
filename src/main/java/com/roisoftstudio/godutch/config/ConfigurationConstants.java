@@ -8,6 +8,6 @@ public class ConfigurationConstants {
     public static final String DOCKER_HOST = System.getenv("DOCKER_HOST");
     public static final String CONTAINER_URL = DOCKER_HOST
             .replace("tcp", "http")
-            .subSequence(0, DOCKER_HOST.length() - 3) + PORT ;
+            .subSequence(0, DOCKER_HOST.length() - 3) + PORT + "/";
 
 }
