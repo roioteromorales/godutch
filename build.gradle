@@ -59,7 +59,7 @@ def dockerHost = System.getenv().DOCKER_HOST
 def dockerCertPath = System.getenv().DOCKER_CERT_PATH
 def tomcatExternalPort = "18080"
 def mongodbExternalPort = "27017"
-def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/godutch-" + version + "/"
+def containerUrl = dockerHost.replace("tcp", "http").subSequence(0, dockerHost.size() - 3) + tomcatExternalPort + "/"
 
 import com.bmuschko.gradle.docker.tasks.container.DockerCreateContainer
 import com.bmuschko.gradle.docker.tasks.container.DockerStartContainer
@@ -79,7 +79,6 @@ docker {
 
 task buildDBImage(type: DockerBuildImage) {
     inputDir = new File("db/")
-    println project.absoluteProjectPath("db/")
     tag = "godutch-db"
 }
 task createDBContainer(type: DockerCreateContainer) {
