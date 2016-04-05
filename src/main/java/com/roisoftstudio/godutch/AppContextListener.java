@@ -1,15 +1,11 @@
 package com.roisoftstudio.godutch;
 
-import com.google.inject.AbstractModule;
 import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.servlet.GuiceServletContextListener;
 import com.google.inject.servlet.ServletModule;
-import com.roisoftstudio.godutch.login.db.dao.InMemoryUserDao;
-import com.roisoftstudio.godutch.login.db.dao.UserDao;
-import com.roisoftstudio.godutch.login.services.DefaultSignService;
-import com.roisoftstudio.godutch.login.services.SignService;
+import com.roisoftstudio.godutch.login.LoginModule;
 import com.squarespace.jersey2.guice.JerseyGuiceModule;
 import com.squarespace.jersey2.guice.JerseyGuiceUtils;
 
@@ -26,19 +22,8 @@ public class AppContextListener extends GuiceServletContextListener {
         List<Module> modules = new ArrayList<>();
 
         modules.add(new JerseyGuiceModule("__HK2_Generated_0"));
-        modules.add(new ServletModule() {
-            @Override
-            protected void configureServlets() {
-                bind(UserDao.class).to(InMemoryUserDao.class);
-                bind(SignService.class).to(DefaultSignService.class);
-            }
-        });
-        modules.add(new AbstractModule() {
-            @Override
-            protected void configure() {
-                // ...
-            }
-        });
+        modules.add(new ServletModule());
+        modules.add(new LoginModule());
 
         injector = Guice.createInjector(modules);
 
