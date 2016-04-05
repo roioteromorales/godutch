@@ -15,7 +15,7 @@ public class SignPath {
     final Logger logger = LoggerFactory.getLogger(SignPath.class);
 
     @Inject
-    private SignService signService; // = new DefaultSignService(new InMemoryUserDao());
+    private SignService signService;
 
     @GET
     @Path("/help")
