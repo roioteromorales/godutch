@@ -9,7 +9,7 @@ public class InfoService {
 
     public InfoService() {
         //future read from file
-        String msName = "GoDutch Microservice";
+        String msName = "GoDutch MicroService";
         String msVersion = "0.1";
         infoModel = new InfoModel(msName, msVersion);
     }
