@@ -1,6 +1,5 @@
 package com.roisoftstudio.godutch.info.services;
 
-import com.google.gson.Gson;
 import com.roisoftstudio.godutch.info.model.InfoModel;
 
 public class InfoService {
@@ -14,7 +13,7 @@ public class InfoService {
         infoModel = new InfoModel(msName, msVersion);
     }
 
-    public String getInfo() {
-        return new Gson().toJson(infoModel);
+    public InfoModel getInfo() {
+        return infoModel;
     }
 }

@@ -5,7 +5,7 @@ public class InfoModel {
     private String msName;
     private String msVersion;
 
-    public InfoModel(String msName, String msVersion) {
+    public InfoModel(final String msName, final String msVersion) {
         this.msName = msName;
         this.msVersion = msVersion;
     }
@@ -14,7 +14,7 @@ public class InfoModel {
         return msName;
     }
 
-    public void setMsName(String msName) {
+    public void setMsName(final String msName) {
         this.msName = msName;
     }
 
@@ -22,7 +22,7 @@ public class InfoModel {
         return msVersion;
     }
 
-    public void setMsVersion(String msVersion) {
+    public void setMsVersion(final String msVersion) {
         this.msVersion = msVersion;
     }
 }
