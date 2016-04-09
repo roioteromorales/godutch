@@ -2,7 +2,6 @@ package com.roisoftstudio.godutch.login.services;
 
 import com.google.inject.Inject;
 import com.roisoftstudio.godutch.login.TokenManager;
-import com.roisoftstudio.godutch.login.db.dao.InMemoryTokenDao;
 import com.roisoftstudio.godutch.login.db.dao.TokenDao;
 import com.roisoftstudio.godutch.login.db.dao.UserDao;
 import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
@@ -19,10 +18,10 @@ public class DefaultSignService implements SignService {
     private final TokenDao tokenDao;
 
     @Inject
-    public DefaultSignService(UserDao userDao) {
+    public DefaultSignService(UserDao userDao, TokenManager tokenManager, TokenDao tokenDao) {
         this.userDao = userDao;
-        tokenManager = new TokenManager();
-        tokenDao = new InMemoryTokenDao();
+        this.tokenManager = tokenManager;
+        this.tokenDao = tokenDao;
     }
 
     @Override
