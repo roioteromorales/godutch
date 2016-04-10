@@ -3,7 +3,6 @@ package com.roisoftstudio.godutch.login.paths;
 import com.google.inject.Inject;
 import com.roisoftstudio.godutch.json.JsonSerializer;
 import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
-import com.roisoftstudio.godutch.login.model.JsonResponse;
 import com.roisoftstudio.godutch.login.services.SignService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,7 +14,7 @@ import javax.ws.rs.core.Response;
 
 @Path("/sign")
 public class SignPath {
-    final Logger logger = LoggerFactory.getLogger(SignPath.class);
+    private final Logger logger = LoggerFactory.getLogger(SignPath.class);
 
     @Inject
     private SignService signService;
@@ -37,22 +36,13 @@ public class SignPath {
         checkNotNull(password, "password");
         String token;
         try {
-            token = signService.signUp(getOrDefault(email), getOrDefault(password));
+            token = signService.signUp(email, password);
         } catch (SignServiceException e) {
             logger.error("An error occurred while signing in. ", e);
             return Response.status(Response.Status.CONFLICT).build();
         }
-        String jsonResponse = jsonSerializer.toJson(new JsonResponse("Email: " + email + "\n" +
-                "password: " + password + "\n" +
-                "Registered Successfully. Your session token is: " + token));
+        return Response.ok(token).build();
 
-        return Response.ok(jsonResponse).build();
-
-    }
-
-    //find out @default value for parameters annotation to remove this
-    private String getOrDefault(String string) {
-        return string != null ? string : "DEFAULTVALUE";
     }
 
     @POST

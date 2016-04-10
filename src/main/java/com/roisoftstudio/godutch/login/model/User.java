@@ -1,6 +1,8 @@
 package com.roisoftstudio.godutch.login.model;
 
-public class User {
+import com.roisoftstudio.godutch.Model;
+
+public class User implements Model {
     private final String email;
     private final String password;
 

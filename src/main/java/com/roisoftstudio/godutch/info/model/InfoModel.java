@@ -1,6 +1,8 @@
 package com.roisoftstudio.godutch.info.model;
 
-public class InfoModel {
+import com.roisoftstudio.godutch.Model;
+
+public class InfoModel implements Model{
 
     private String msName;
     private String msVersion;

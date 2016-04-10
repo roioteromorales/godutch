@@ -30,12 +30,12 @@ public class DefaultSignService implements SignService {
         try {
             userDao.addUser(user);
         } catch (UserAlreadyExistsException e) {
-            throw new SignServiceException("An error occurred when adding user. ", e);
+            throw new SignServiceException("An error occurred when adding the user " + user.getEmail(), e);
         }
         String token = tokenManager.createToken(user);
         tokenDao.addToken(token);
 
-        logger.info("added token: " + token);
+        logger.info("User: " + token + " logged in with token: " + token);
         return token;
     }
 
