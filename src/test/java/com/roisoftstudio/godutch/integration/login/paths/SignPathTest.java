@@ -42,4 +42,23 @@ public class SignPathTest {
 
         assertThat(request.code()).isEqualTo(OK.getStatusCode());
     }
+
+    @Test
+    public void whenSignUpTwiceWithSameEmail_shouldFailOnSecondSignUp() throws Exception {
+        Map<String, String> formParameters = new HashMap<>();
+        formParameters.put("email", "email@mail.com");
+        formParameters.put("password", "pass");
+
+        HttpRequest request = HttpRequest.put(CONTAINER_URL + PATH + "up").form(formParameters);
+        assertThat(request.code()).isEqualTo(OK.getStatusCode());
+
+        HttpRequest request2 = HttpRequest.put(CONTAINER_URL + PATH + "up").form(formParameters);
+        assertThat(request2.code()).isEqualTo(OK.getStatusCode());
+    }
+
+    @Test
+    public void signIn_shouldReturnXXXifNotSignedIn() throws Exception {
+
+
+    }
 }

@@ -11,6 +11,9 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
+import static javax.ws.rs.core.Response.Status.CONFLICT;
+import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+
 
 @Path("/sign")
 public class SignPath {
@@ -39,7 +42,7 @@ public class SignPath {
             token = signService.signUp(email, password);
         } catch (SignServiceException e) {
             logger.error("An error occurred while signing in. ", e);
-            return Response.status(Response.Status.CONFLICT).build();
+            return Response.status(CONFLICT).build();
         }
         return Response.ok(token).build();
 
@@ -51,7 +54,7 @@ public class SignPath {
         if (signService.isSignedIn(token)) {
             return Response.ok("You are Signed in.").build();
         } else {
-            return Response.ok("Your token is invalid: " + token).build();
+            return Response.ok("Your token is invalid: " + token).status(UNAUTHORIZED).build();
         }
 
     }
