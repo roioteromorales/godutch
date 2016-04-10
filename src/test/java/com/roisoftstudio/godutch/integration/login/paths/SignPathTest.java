@@ -1,30 +1,45 @@
 package com.roisoftstudio.godutch.integration.login.paths;
 
-import com.sun.jersey.test.framework.AppDescriptor;
-import com.sun.jersey.test.framework.JerseyTest;
-import com.sun.jersey.test.framework.WebAppDescriptor;
+import com.github.kevinsawicki.http.HttpRequest;
+import org.junit.Test;
 
-public class SignPathTest extends JerseyTest {
+import java.util.HashMap;
+import java.util.Map;
 
-    @Override
-    protected AppDescriptor configure() {
-        return new WebAppDescriptor.Builder().build();
+import static com.roisoftstudio.godutch.config.ConfigurationConstants.CONTAINER_URL;
+import static javax.ws.rs.core.Response.Status.BAD_REQUEST;
+import static javax.ws.rs.core.Response.Status.OK;
+import static org.assertj.core.api.Assertions.assertThat;
+
+public class SignPathTest {
+
+    public static final String PATH = "sign/";
+
+    @Test
+    public void getHelpIsWorking() throws Exception {
+        String response = HttpRequest.get(CONTAINER_URL + PATH + "help").body();
+        assertThat(response).isEqualTo("This is working");
     }
 
-    //todo fix tests with good ip and parameters
-//    @Test
-//    public void userCanSignUp() throws JSONException, URISyntaxException {
-//        WebResource webResource = client().resource("http://192.168.99.100:18080/");
-//        JSONObject json = webResource.path("godutch-0.1/sign/up").put(JSONObject.class);
-//        assertThat(json.get("id"), is("12"));
-//        assertThat(json.get("firstName"), is("Tim"));
-//        assertThat(json.get("lastName"), is("Tester"));
-//        assertThat(json.get("birthday"), is("1970-01-16T07:56:49.871+01:00"));
-//    }
-//
-//    @Test(expected = UniformInterfaceException.class)
-//    public void testUserNotFound() {
-//        WebResource webResource = client().resource("http://localhost:8080/");
-//        JSONObject json = webResource.path("/rest-test-tutorial/user/id/666").get(JSONObject.class);
-//    }
+    @Test
+    public void signUpWithWrongFormData_shouldFail() throws Exception {
+        Map<String, String> formParameters = new HashMap<>();
+
+        HttpRequest request = HttpRequest.put(CONTAINER_URL + PATH + "up")
+                .contentType("application/x-www-form-urlencoded")
+                .form(formParameters);
+
+        assertThat(request.code()).isEqualTo(BAD_REQUEST.getStatusCode());
+    }
+
+    @Test
+    public void signUp_shouldCreateAnUser() throws Exception {
+        Map<String, String> formParameters = new HashMap<>();
+        formParameters.put("email", "email@mail.com");
+        formParameters.put("password", "pass");
+
+        HttpRequest request = HttpRequest.put(CONTAINER_URL + PATH + "up").form(formParameters);
+
+        assertThat(request.code()).isEqualTo(OK.getStatusCode());
+    }
 }

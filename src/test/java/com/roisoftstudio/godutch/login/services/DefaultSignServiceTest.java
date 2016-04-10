@@ -1,5 +1,7 @@
 package com.roisoftstudio.godutch.login.services;
 
+import com.roisoftstudio.godutch.login.TokenManager;
+import com.roisoftstudio.godutch.login.db.dao.TokenDao;
 import com.roisoftstudio.godutch.login.db.dao.UserDao;
 import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
 import com.roisoftstudio.godutch.login.exceptions.UserAlreadyExistsException;
@@ -20,21 +22,30 @@ public class DefaultSignServiceTest {
     private SignService signService;
 
     @Mock
-    UserDao userDao;
+    private UserDao userDao;
 
-//    Injector injector = Guice.createInjector(new LoginModule());
-//    UserDao userDao = injector.getInstance(UserDao.class);
+    @Mock
+    private TokenManager tokenManager;
+
+    @Mock
+    private TokenDao tokenDao;
+
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
-        signService = new DefaultSignService(userDao);
+        signService = new DefaultSignService(userDao, tokenManager, tokenDao);
     }
 
     @Test
     public void signUp_shouldCreateNewUser() throws Exception {
-        when(userDao.contains(any(User.class))).thenReturn(true);
+        String user = "user";
+        String email = "email";
 
-        String token = signService.signUp("user", "email");
+        when(userDao.contains(any(User.class))).thenReturn(true);
+        when(tokenManager.createToken(any(User.class))).thenReturn(user + email);
+        String token = signService.signUp(user, email);
+
+        when(tokenDao.hasToken(token)).thenReturn(true);
 
         assertThat(signService.isSignedIn(token), is(true));
     }
