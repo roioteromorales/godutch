@@ -48,6 +48,18 @@ public class DefaultSignService implements SignService {
     }
 
     @Override
+    public boolean signOut(String token) {
+        if(tokenDao.hasToken(token)){
+            tokenDao.removeToken(token);
+            logger.info("User with token " + token + " has signed out.");
+            return true;
+        }else{
+            logger.info("Cannot sign out User with token " + token + ". It is not signed in.");
+            return false;
+        }
+    }
+
+    @Override
     public boolean isSignedIn(String token) {
         return tokenDao.hasToken(token);
     }

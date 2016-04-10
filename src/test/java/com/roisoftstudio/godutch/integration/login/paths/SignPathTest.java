@@ -59,6 +59,7 @@ public class SignPathTest {
 
         assertThat(signInRequest.code()).isEqualTo(UNAUTHORIZED.getStatusCode());
     }
+
     @Test
     public void signIn_shouldReturnTrue_ifIsSignedIn() throws Exception {
         HttpRequest signUpRequest = signUpRequest("email6@mail.com", "pass");
@@ -72,16 +73,44 @@ public class SignPathTest {
         assertThat(signInRequest.body()).isEqualTo("true");
     }
 
+    @Test
+    public void signOut_shouldReturnFalse_ifSignsOutWithoutBeingSignedIn() throws Exception {
+        HttpRequest signOutRequest = signOutRequest("TOKEN");
+        assertThat(signOutRequest.code()).isEqualTo(OK.getStatusCode());
+        assertThat(signOutRequest.body()).isEqualTo("false");
+    }
+
+    @Test
+    public void signOut_shouldReturnTrue_ifSignsOutBeingSignedIn() throws Exception {
+        HttpRequest signUpRequest = signUpRequest("email7@mail.com", "pass");
+        assertThat(signUpRequest.code()).isEqualTo(CREATED.getStatusCode());
+        String token = signUpRequest.body().toString();
+        assertThat(token).isNotEmpty();
+
+        HttpRequest signOutRequest = signOutRequest(token);
+        assertThat(signOutRequest.code()).isEqualTo(OK.getStatusCode());
+        assertThat(signOutRequest.body()).isEqualTo("true");
+    }
+
     private HttpRequest signInRequest(String emailValue, String passValue) {
         return HttpRequest.post(CONTAINER_URL + PATH + "in")
                 .contentType("application/x-www-form-urlencoded")
                 .form(getFormParameters(emailValue, passValue));
     }
-
     private HttpRequest signUpRequest(String emailValue, String passValue) {
         return HttpRequest.put(CONTAINER_URL + PATH + "up")
                 .contentType("application/x-www-form-urlencoded")
                 .form(getFormParameters(emailValue, passValue));
+    }
+
+    private HttpRequest signOutRequest(String token) {
+        Map<String, String> formParameters = new HashMap<>();
+        if (token != null) {
+            formParameters.put("token", token);
+        }
+        return HttpRequest.post(CONTAINER_URL + PATH + "out")
+                .contentType("application/x-www-form-urlencoded")
+                .form(formParameters);
     }
 
     private Map<String, String> getFormParameters(String emailValue, String passValue) {

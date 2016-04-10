@@ -20,6 +20,11 @@ public class InMemoryTokenDao implements TokenDao {
     }
 
     @Override
+    public void removeToken(String token) {
+        tokenList.remove(token);
+    }
+
+    @Override
     public boolean hasToken(String token) {
         return tokenList.contains(token);
     }

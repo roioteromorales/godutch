@@ -71,4 +71,16 @@ public class DefaultSignServiceTest {
 
         assertThat(signService.signIn("email", "password"), is(true));
     }
+
+    @Test
+    public void signOutWithNotSignedUserToken_shouldReturnFalse() throws Exception {
+        assertThat(signService.signOut("Token"),is(false));
+    }
+
+    @Test
+    public void signOutWithSignedInUserToken_shouldReturnTrue() throws Exception {
+        when(tokenDao.hasToken("tokenValue")).thenReturn(true);
+
+        assertThat(signService.signOut("tokenValue"),is(true));
+    }
 }

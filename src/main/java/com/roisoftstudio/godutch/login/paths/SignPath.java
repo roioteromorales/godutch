@@ -66,10 +66,16 @@ public class SignPath {
         }
     }
 
-    @GET
+    @POST
     @Path("/out")
-    public Response signOut() {
-        return Response.ok("Sign Out").build();
+    public Response signOut(@NotNull @FormParam("token") String token) {
+        checkNotNull(token, "token"); // try to make work @NotNull annotation on param
+
+        if(signService.signOut(token)){
+            return Response.ok(true).status(OK).build();
+        }else{
+            return Response.ok(false).status(OK).build();
+        }
     }
 
 
