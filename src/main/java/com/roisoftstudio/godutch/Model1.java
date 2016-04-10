@@ -1,4 +1,4 @@
 package com.roisoftstudio.godutch;
 
-public interface Model {
+public interface Model1 {
 }
