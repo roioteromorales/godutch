@@ -11,8 +11,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
-import static javax.ws.rs.core.Response.Status.CONFLICT;
-import static javax.ws.rs.core.Response.Status.UNAUTHORIZED;
+import static javax.ws.rs.core.Response.Status.*;
 
 
 @Path("/sign")
@@ -44,19 +43,27 @@ public class SignPath {
             logger.error("An error occurred while signing in. ", e);
             return Response.status(CONFLICT).build();
         }
-        return Response.ok(token).build();
+        return Response.ok(token).status(CREATED).build();
 
     }
 
     @POST
+    @Consumes("application/x-www-form-urlencoded")
     @Path("/in")
-    public Response signIn(@FormParam("token") String token) {
-        if (signService.isSignedIn(token)) {
-            return Response.ok("You are Signed in.").build();
-        } else {
-            return Response.ok("Your token is invalid: " + token).status(UNAUTHORIZED).build();
+    public Response signIn(@NotNull @FormParam("email") String email, @NotNull @FormParam("password") String password) {
+        checkNotNull(email, "email"); // try to make work @NotNull annotation on param
+        checkNotNull(password, "password");
+        try {
+            if (signService.signIn(email, password)) {
+                return Response.ok(true).status(OK).build();
+            } else {
+                logger.info("Error Unauthorized user: " + email);
+                return Response.ok(false).status(UNAUTHORIZED).build();
+            }
+        } catch (SignServiceException e) {
+            logger.error("An error occurred while signing in. ", e);
+            return Response.status(INTERNAL_SERVER_ERROR).build();
         }
-
     }
 
     @GET
@@ -67,7 +74,7 @@ public class SignPath {
 
 
     private void checkNotNull(String parameter, String parameterName) {
-        if (parameter == null) {
+        if (parameter == null || parameter.equals("")) {
             throw new BadRequestException("Required parameter was null: " + parameterName);
         }
     }

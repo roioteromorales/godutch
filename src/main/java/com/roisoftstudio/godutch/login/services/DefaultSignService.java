@@ -35,15 +35,20 @@ public class DefaultSignService implements SignService {
         String token = tokenManager.createToken(user);
         tokenDao.addToken(token);
 
-        logger.info("User: " + token + " logged in with token: " + token);
+        logger.info("User: " + user.getEmail() + " logged in with token: " + token);
         return token;
     }
 
     @Override
+    public boolean signIn(String email, String password) throws SignServiceException {
+        User user = new User(email, password);
+        String token = tokenManager.createToken(user);
+        logger.info("User: " + user.getEmail() + " logged in with token: " + token);
+        return tokenDao.hasToken(token);
+    }
+
+    @Override
     public boolean isSignedIn(String token) {
-//        String userEmail = tokenManager.decodeToken(token);
-//        User user = userDao.findByEmail(userEmail);
-        logger.info("checking token: " + token);
         return tokenDao.hasToken(token);
     }
 }

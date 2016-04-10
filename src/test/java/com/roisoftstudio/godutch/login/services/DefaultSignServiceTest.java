@@ -38,12 +38,12 @@ public class DefaultSignServiceTest {
 
     @Test
     public void signUp_shouldCreateNewUser() throws Exception {
-        String user = "user";
         String email = "email";
+        String password = "password";
 
         when(userDao.contains(any(User.class))).thenReturn(true);
-        when(tokenManager.createToken(any(User.class))).thenReturn(user + email);
-        String token = signService.signUp(user, email);
+        when(tokenManager.createToken(any(User.class))).thenReturn(email + password);
+        String token = signService.signUp(email, password);
 
         when(tokenDao.hasToken(token)).thenReturn(true);
 
@@ -51,10 +51,24 @@ public class DefaultSignServiceTest {
     }
 
     @Test(expected = SignServiceException.class)
-    public void signUp_shouldShouldFailIfUserExists() throws Exception {
+    public void signUpTwice_shouldShouldFailIfUserExists() throws Exception {
         doNothing().doThrow(new UserAlreadyExistsException("Error ")).when(userDao).addUser(any(User.class));
 
-        signService.signUp("user", "email");
-        signService.signUp("user", "email");
+        signService.signUp("email", "password");
+        signService.signUp("email", "password");
+    }
+
+    @Test
+    public void signInWithNotExistingUser_shouldReturnFalse() throws Exception {
+        assertThat(signService.signIn("email", "password"), is(false));
+    }
+
+    @Test
+    public void signInWithExistingUser_shouldReturnTrue() throws Exception {
+        User user = new User("email", "password");
+        when(tokenManager.createToken(user)).thenReturn("tokenValue");
+        when(tokenDao.hasToken("tokenValue")).thenReturn(true);
+
+        assertThat(signService.signIn("email", "password"), is(true));
     }
 }
