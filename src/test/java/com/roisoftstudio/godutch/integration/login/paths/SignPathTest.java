@@ -1,6 +1,8 @@
 package com.roisoftstudio.godutch.integration.login.paths;
 
 import com.github.kevinsawicki.http.HttpRequest;
+import com.roisoftstudio.godutch.json.GsonSerializer;
+import com.roisoftstudio.godutch.login.model.Credentials;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -76,7 +78,7 @@ public class SignPathTest {
     @Test
     public void signOut_shouldReturnFalse_ifSignsOutWithoutBeingSignedIn() throws Exception {
         HttpRequest signOutRequest = signOutRequest("TOKEN");
-        assertThat(signOutRequest.code()).isEqualTo(OK.getStatusCode());
+        assertThat(signOutRequest.code()).isEqualTo(UNAUTHORIZED.getStatusCode());
         assertThat(signOutRequest.body()).isEqualTo("false");
     }
 
@@ -99,8 +101,8 @@ public class SignPathTest {
     }
     private HttpRequest signUpRequest(String emailValue, String passValue) {
         return HttpRequest.put(CONTAINER_URL + PATH + "up")
-                .contentType("application/x-www-form-urlencoded")
-                .form(getFormParameters(emailValue, passValue));
+                .contentType("application/json")
+                .send(new GsonSerializer().toJson(new Credentials(emailValue,passValue)));
     }
 
     private HttpRequest signOutRequest(String token) {

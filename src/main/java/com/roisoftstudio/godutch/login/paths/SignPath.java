@@ -3,6 +3,7 @@ package com.roisoftstudio.godutch.login.paths;
 import com.google.inject.Inject;
 import com.roisoftstudio.godutch.json.JsonSerializer;
 import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
+import com.roisoftstudio.godutch.login.model.Credentials;
 import com.roisoftstudio.godutch.login.services.SignService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -11,6 +12,7 @@ import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
 
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.*;
 
 
@@ -31,14 +33,15 @@ public class SignPath {
     }
 
     @PUT
-    @Consumes("application/x-www-form-urlencoded")
+    @Produces(APPLICATION_JSON)
+    @Consumes(APPLICATION_JSON)
     @Path("/up")
-    public Response signUp(@NotNull @FormParam("email") String email, @NotNull @FormParam("password") String password) {
-        checkNotNull(email, "email"); // try to make work @NotNull annotation on param
-        checkNotNull(password, "password");
+    public Response signUp(Credentials credentials) {
+        checkNotNull(credentials.getEmail(), "email"); // try to make work @NotNull annotation on param
+        checkNotNull(credentials.getPassword(), "password");
         String token;
         try {
-            token = signService.signUp(email, password);
+            token = signService.signUp(credentials.getEmail(), credentials.getPassword());
         } catch (SignServiceException e) {
             logger.error("An error occurred while signing in. ", e);
             return Response.status(CONFLICT).build();
@@ -74,7 +77,7 @@ public class SignPath {
         if(signService.signOut(token)){
             return Response.ok(true).status(OK).build();
         }else{
-            return Response.ok(false).status(OK).build();
+            return Response.ok(false).status(UNAUTHORIZED).build();
         }
     }
 
