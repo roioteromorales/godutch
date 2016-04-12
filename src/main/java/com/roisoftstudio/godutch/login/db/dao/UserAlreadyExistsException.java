@@ -1,4 +1,6 @@
-package com.roisoftstudio.godutch.login.exceptions;
+package com.roisoftstudio.godutch.login.db.dao;
+
+import com.roisoftstudio.godutch.login.services.SignServiceException;
 
 public class UserAlreadyExistsException extends SignServiceException {
     public UserAlreadyExistsException() {

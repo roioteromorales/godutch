@@ -3,22 +3,22 @@ package com.roisoftstudio.godutch.login.services;
 import com.roisoftstudio.godutch.login.TokenManager;
 import com.roisoftstudio.godutch.login.db.dao.TokenDao;
 import com.roisoftstudio.godutch.login.db.dao.UserDao;
-import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
-import com.roisoftstudio.godutch.login.exceptions.UserAlreadyExistsException;
+import com.roisoftstudio.godutch.login.db.dao.UserAlreadyExistsException;
 import com.roisoftstudio.godutch.login.model.User;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import static org.hamcrest.MatcherAssert.assertThat;
-import static org.hamcrest.core.Is.is;
+import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.doNothing;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 public class DefaultSignServiceTest {
 
+    private static final String SAMPLE_EMAIL = "email";
+    private static final String SAMPLE_PASSWORD = "password";
     private SignService signService;
 
     @Mock
@@ -37,50 +37,49 @@ public class DefaultSignServiceTest {
     }
 
     @Test
-    public void signUp_shouldCreateNewUser() throws Exception {
-        String email = "email";
-        String password = "password";
-
-        when(userDao.contains(any(User.class))).thenReturn(true);
-        when(tokenManager.createToken(any(User.class))).thenReturn(email + password);
-        String token = signService.signUp(email, password);
-
-        when(tokenDao.hasToken(token)).thenReturn(true);
-
-        assertThat(signService.isSignedIn(token), is(true));
-    }
-
-    @Test(expected = SignServiceException.class)
-    public void signUpTwice_shouldShouldFailIfUserExists() throws Exception {
-        doNothing().doThrow(new UserAlreadyExistsException("Error ")).when(userDao).addUser(any(User.class));
-
-        signService.signUp("email", "password");
-        signService.signUp("email", "password");
+    public void signUp_shouldCreateUser() throws Exception {
+        signService.signUp(SAMPLE_EMAIL, SAMPLE_PASSWORD);
+        verify(userDao, atLeastOnce()).addUser(new User(SAMPLE_EMAIL, SAMPLE_PASSWORD));
     }
 
     @Test
-    public void signInWithNotExistingUser_shouldReturnFalse() throws Exception {
-        assertThat(signService.signIn("email", "password"), is(false));
+    public void signUpTwice_shouldThrowSignServiceExceptionIfUserExists() throws Exception {
+        UserAlreadyExistsException alreadyExistsException = new UserAlreadyExistsException("Error ");
+        doNothing().doThrow(alreadyExistsException).when(userDao).addUser(any(User.class));
+
+        signService.signUp(SAMPLE_EMAIL, SAMPLE_PASSWORD);
+
+        assertThatExceptionOfType(SignServiceException.class)
+                .isThrownBy(() -> signService.signUp(SAMPLE_EMAIL, SAMPLE_PASSWORD))
+                .withMessageContaining("An error occurred")
+                .withCause(alreadyExistsException);
     }
 
     @Test
-    public void signInWithExistingUser_shouldReturnTrue() throws Exception {
-        User user = new User("email", "password");
+    public void signInWithNotExistingUser_shouldThrowInvalidCredentialsException() throws Exception {
+        assertThatExceptionOfType(InvalidCredentialsException.class)
+                .isThrownBy(() -> signService.signIn(SAMPLE_EMAIL, SAMPLE_PASSWORD))
+                .withMessageContaining("Invalid Credentials");
+    }
+
+    @Test
+    public void signInWithExistingUser_shouldReturnAValidToken() throws Exception {
+        User user = new User(SAMPLE_EMAIL, SAMPLE_PASSWORD);
+        when(userDao.contains(user)).thenReturn(true);
         when(tokenManager.createToken(user)).thenReturn("tokenValue");
-        when(tokenDao.hasToken("tokenValue")).thenReturn(true);
 
-        assertThat(signService.signIn("email", "password"), is(true));
+        assertThat(signService.signIn(SAMPLE_EMAIL, SAMPLE_PASSWORD)).isEqualTo("tokenValue");
     }
 
     @Test
     public void signOutWithNotSignedUserToken_shouldReturnFalse() throws Exception {
-        assertThat(signService.signOut("Token"),is(false));
+        assertThat(signService.signOut("Token")).isFalse();
     }
 
     @Test
     public void signOutWithSignedInUserToken_shouldReturnTrue() throws Exception {
         when(tokenDao.hasToken("tokenValue")).thenReturn(true);
 
-        assertThat(signService.signOut("tokenValue"),is(true));
+        assertThat(signService.signOut("tokenValue")).isTrue();
     }
 }

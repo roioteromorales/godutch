@@ -4,14 +4,14 @@ import com.google.inject.Inject;
 import com.roisoftstudio.godutch.login.TokenManager;
 import com.roisoftstudio.godutch.login.db.dao.TokenDao;
 import com.roisoftstudio.godutch.login.db.dao.UserDao;
-import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
-import com.roisoftstudio.godutch.login.exceptions.UserAlreadyExistsException;
+import com.roisoftstudio.godutch.login.db.dao.TokenAlreadyExistsException;
+import com.roisoftstudio.godutch.login.db.dao.UserAlreadyExistsException;
 import com.roisoftstudio.godutch.login.model.User;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 public class DefaultSignService implements SignService {
-    final Logger logger = LoggerFactory.getLogger(DefaultSignService.class);
+    private final Logger logger = LoggerFactory.getLogger(DefaultSignService.class);
 
     private UserDao userDao;
     private final TokenManager tokenManager;
@@ -25,36 +25,47 @@ public class DefaultSignService implements SignService {
     }
 
     @Override
-    public String signUp(String email, String password) throws SignServiceException {
+    public void signUp(String email, String password) throws SignServiceException {
         User user = new User(email, password);
         try {
             userDao.addUser(user);
         } catch (UserAlreadyExistsException e) {
-            throw new SignServiceException("An error occurred when adding the user " + user.getEmail(), e);
+            String msg = "An error occurred when adding the user " + user.getEmail();
+            logger.error(msg);
+            throw new SignServiceException(msg, e);
         }
-        String token = tokenManager.createToken(user);
-        tokenDao.addToken(token);
-
-        logger.info("User: " + user.getEmail() + " logged in with token: " + token);
-        return token;
     }
 
     @Override
-    public boolean signIn(String email, String password) throws SignServiceException {
+    public String signIn(String email, String password) throws SignServiceException, InvalidCredentialsException {
         User user = new User(email, password);
-        String token = tokenManager.createToken(user);
-        logger.info("User: " + user.getEmail() + " logged in with token: " + token);
-        return tokenDao.hasToken(token);
+        if(userDao.contains(user)){
+            String token = tokenManager.createToken(user);
+            try {
+                tokenDao.addToken(user.getEmail(), token);
+                logger.info("User: " + user.getEmail() + " logged in with token: " + token);
+                return token;
+            } catch (TokenAlreadyExistsException e) {
+                String msg = "An error occurred trying to save the token for the user " + user.getEmail();
+                logger.error(msg);
+                throw new SignServiceException(msg, e);
+            }
+        }else{
+            String msg = "Invalid Credentials";
+            logger.error(msg);
+            throw new InvalidCredentialsException(msg);
+        }
+
     }
 
     @Override
-    public boolean signOut(String token) {
+    public boolean signOut(String token) throws SignServiceException {
         if(tokenDao.hasToken(token)){
-            tokenDao.removeToken(token);
+            tokenDao.removeTokenFor(token);
             logger.info("User with token " + token + " has signed out.");
             return true;
         }else{
-            logger.info("Cannot sign out User with token " + token + ". It is not signed in.");
+            logger.error("Cannot sign out User with token " + token + ". It is not signed in.");
             return false;
         }
     }

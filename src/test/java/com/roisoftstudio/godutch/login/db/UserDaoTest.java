@@ -1,7 +1,7 @@
 package com.roisoftstudio.godutch.login.db;
 
 import com.roisoftstudio.godutch.login.db.dao.InMemoryUserDao;
-import com.roisoftstudio.godutch.login.exceptions.UserAlreadyExistsException;
+import com.roisoftstudio.godutch.login.db.dao.UserAlreadyExistsException;
 import com.roisoftstudio.godutch.login.model.User;
 import org.junit.Before;
 import org.junit.Test;

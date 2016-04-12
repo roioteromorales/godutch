@@ -2,7 +2,8 @@ package com.roisoftstudio.godutch.login.paths;
 
 import com.google.inject.Inject;
 import com.roisoftstudio.godutch.json.JsonSerializer;
-import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
+import com.roisoftstudio.godutch.login.services.InvalidCredentialsException;
+import com.roisoftstudio.godutch.login.services.SignServiceException;
 import com.roisoftstudio.godutch.login.model.Credentials;
 import com.roisoftstudio.godutch.login.services.SignService;
 import org.slf4j.Logger;
@@ -39,14 +40,13 @@ public class SignPath {
     public Response signUp(Credentials credentials) {
         checkNotNull(credentials.getEmail(), "email"); // try to make work @NotNull annotation on param
         checkNotNull(credentials.getPassword(), "password");
-        String token;
         try {
-            token = signService.signUp(credentials.getEmail(), credentials.getPassword());
+            signService.signUp(credentials.getEmail(), credentials.getPassword());
+            return Response.status(CREATED).build();
         } catch (SignServiceException e) {
-            logger.error("An error occurred while signing in. ", e);
+            logger.error("An error occurred while signing up. ", e);
             return Response.status(CONFLICT).build();
         }
-        return Response.ok(token).status(CREATED).build();
 
     }
 
@@ -57,15 +57,14 @@ public class SignPath {
         checkNotNull(email, "email"); // try to make work @NotNull annotation on param
         checkNotNull(password, "password");
         try {
-            if (signService.signIn(email, password)) {
-                return Response.ok(true).status(OK).build();
-            } else {
-                logger.info("Error Unauthorized user: " + email);
-                return Response.ok(false).status(UNAUTHORIZED).build();
-            }
+            String token = signService.signIn(email, password);
+            return Response.ok(token).status(OK).build();
         } catch (SignServiceException e) {
             logger.error("An error occurred while signing in. ", e);
             return Response.status(INTERNAL_SERVER_ERROR).build();
+        } catch (InvalidCredentialsException e) {
+            logger.error("Error Unauthorized user: " + email);
+            return Response.status(UNAUTHORIZED).build();
         }
     }
 
@@ -73,11 +72,15 @@ public class SignPath {
     @Path("/out")
     public Response signOut(@NotNull @FormParam("token") String token) {
         checkNotNull(token, "token"); // try to make work @NotNull annotation on param
-
-        if(signService.signOut(token)){
-            return Response.ok(true).status(OK).build();
-        }else{
-            return Response.ok(false).status(UNAUTHORIZED).build();
+        try {
+            if (signService.signOut(token)) {
+                return Response.status(OK).build();
+            } else {
+                return Response.status(UNAUTHORIZED).build();
+            }
+        } catch (SignServiceException e) {
+            logger.error("An error occurred while signing out. ", e);
+            return Response.status(INTERNAL_SERVER_ERROR).build();
         }
     }
 

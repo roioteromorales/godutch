@@ -7,6 +7,7 @@ import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Random;
 
 import static com.roisoftstudio.godutch.config.ConfigurationConstants.CONTAINER_URL;
 import static javax.ws.rs.core.Response.Status.*;
@@ -14,7 +15,7 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 public class SignPathTest {
 
-    public static final String PATH = "sign/";
+    private static final String PATH = "sign/";
 
     @Test
     public void getHelpIsWorking() throws Exception {
@@ -36,62 +37,67 @@ public class SignPathTest {
 
     @Test
     public void signUp_shouldCreateAnUser() throws Exception {
-        HttpRequest signUpRequest = signUpRequest("email@mail.com", "pass");
+        HttpRequest signUpRequest = signUpRequest(aRandomEmail(), "pass");
         assertThat(signUpRequest.code()).isEqualTo(CREATED.getStatusCode());
+    }
+
+    private String aRandomEmail() {
+        return new Random().nextInt() + "@mail.com";
     }
 
     @Test
     public void whenSignUpTwiceWithSameEmail_shouldFailOnSecondSignUp() throws Exception {
-        HttpRequest signUpRequest = signUpRequest("email2@mail.com", "pass");
+        String emailValue = aRandomEmail();
+        HttpRequest signUpRequest = signUpRequest(emailValue, "pass");
         assertThat(signUpRequest.code()).isEqualTo(CREATED.getStatusCode());
 
-        HttpRequest signUpRequest2 = signUpRequest("email2@mail.com", "pass");
+        HttpRequest signUpRequest2 = signUpRequest(emailValue, "pass");
         assertThat(signUpRequest2.code()).isEqualTo(CONFLICT.getStatusCode());
     }
 
     @Test
     public void signIn_shouldReturnBadRequestStatusCode_ifNullParameters() throws Exception {
-        HttpRequest signInRequest = signInRequest("","");
+        HttpRequest signInRequest = signInRequest("", "");
 
         assertThat(signInRequest.code()).isEqualTo(BAD_REQUEST.getStatusCode());
     }
+
     @Test
     public void signIn_shouldReturnUnauthorizedStatusCode_ifNotLoggedIn() throws Exception {
-        HttpRequest signInRequest = signInRequest("notLoggedInEmail","pass");
+        HttpRequest signInRequest = signInRequest("notLoggedInEmail", "pass");
 
         assertThat(signInRequest.code()).isEqualTo(UNAUTHORIZED.getStatusCode());
     }
 
     @Test
     public void signIn_shouldReturnTrue_ifIsSignedIn() throws Exception {
-        HttpRequest signUpRequest = signUpRequest("email6@mail.com", "pass");
+        String emailValue = aRandomEmail();
+        HttpRequest signUpRequest = signUpRequest(emailValue, "pass");
         assertThat(signUpRequest.code()).isEqualTo(CREATED.getStatusCode());
-        String token = signUpRequest.body().toString();
-        assertThat(token).isNotEmpty();
 
-        HttpRequest signInRequest = signInRequest("email6@mail.com", "pass");
-
+        HttpRequest signInRequest = signInRequest(emailValue, "pass");
         assertThat(signInRequest.code()).isEqualTo(OK.getStatusCode());
-        assertThat(signInRequest.body()).isEqualTo("true");
     }
 
     @Test
     public void signOut_shouldReturnFalse_ifSignsOutWithoutBeingSignedIn() throws Exception {
         HttpRequest signOutRequest = signOutRequest("TOKEN");
         assertThat(signOutRequest.code()).isEqualTo(UNAUTHORIZED.getStatusCode());
-        assertThat(signOutRequest.body()).isEqualTo("false");
+        assertThat(signOutRequest.body()).contains("HTTP Status 401 - Unauthorized");
     }
 
     @Test
     public void signOut_shouldReturnTrue_ifSignsOutBeingSignedIn() throws Exception {
-        HttpRequest signUpRequest = signUpRequest("email7@mail.com", "pass");
-        assertThat(signUpRequest.code()).isEqualTo(CREATED.getStatusCode());
-        String token = signUpRequest.body().toString();
-        assertThat(token).isNotEmpty();
+        String emailValue = aRandomEmail();
+        assertThat(signUpRequest(emailValue, "pass").code()).isEqualTo(CREATED.getStatusCode());
 
+        HttpRequest signInResponse = signInRequest(emailValue, "pass");
+        assertThat(signInResponse.code()).isEqualTo(OK.getStatusCode());
+
+
+        String token = signInResponse.body();
         HttpRequest signOutRequest = signOutRequest(token);
         assertThat(signOutRequest.code()).isEqualTo(OK.getStatusCode());
-        assertThat(signOutRequest.body()).isEqualTo("true");
     }
 
     private HttpRequest signInRequest(String emailValue, String passValue) {
@@ -99,10 +105,11 @@ public class SignPathTest {
                 .contentType("application/x-www-form-urlencoded")
                 .form(getFormParameters(emailValue, passValue));
     }
+
     private HttpRequest signUpRequest(String emailValue, String passValue) {
         return HttpRequest.put(CONTAINER_URL + PATH + "up")
                 .contentType("application/json")
-                .send(new GsonSerializer().toJson(new Credentials(emailValue,passValue)));
+                .send(new GsonSerializer().toJson(new Credentials(emailValue, passValue)));
     }
 
     private HttpRequest signOutRequest(String token) {
