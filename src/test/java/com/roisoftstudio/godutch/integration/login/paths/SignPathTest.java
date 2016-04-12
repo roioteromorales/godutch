@@ -3,6 +3,7 @@ package com.roisoftstudio.godutch.integration.login.paths;
 import com.github.kevinsawicki.http.HttpRequest;
 import com.roisoftstudio.godutch.json.GsonSerializer;
 import com.roisoftstudio.godutch.login.model.Credentials;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.util.HashMap;
@@ -23,14 +24,22 @@ public class SignPathTest {
         assertThat(helpRequest.body()).isEqualTo("This is working");
     }
 
+    @Ignore // Signup throws null pointer exception because of credentials. need fix.
     @Test
-    public void signUpWithNullFormData_shouldFail() throws Exception {
+    public void signUpWithNullBody_shouldFailWithBadRequest() throws Exception {
+        HttpRequest signUpRequest = HttpRequest.put(CONTAINER_URL + PATH + "up")
+                .contentType("application/json");
+        assertThat(signUpRequest.code()).isEqualTo(BAD_REQUEST.getStatusCode());
+    }
+
+    @Test
+    public void signUpWithNullData_shouldFail() throws Exception {
         HttpRequest signUpRequest = signUpRequest(null, null);
         assertThat(signUpRequest.code()).isEqualTo(BAD_REQUEST.getStatusCode());
     }
 
     @Test
-    public void signUpWithEmptyFormData_shouldFail() throws Exception {
+    public void signUpWithEmptyData_shouldFail() throws Exception {
         HttpRequest signUpRequest = signUpRequest("", "");
         assertThat(signUpRequest.code()).isEqualTo(BAD_REQUEST.getStatusCode());
     }
@@ -39,10 +48,6 @@ public class SignPathTest {
     public void signUp_shouldCreateAnUser() throws Exception {
         HttpRequest signUpRequest = signUpRequest(aRandomEmail(), "pass");
         assertThat(signUpRequest.code()).isEqualTo(CREATED.getStatusCode());
-    }
-
-    private String aRandomEmail() {
-        return new Random().nextInt() + "@mail.com";
     }
 
     @Test
@@ -87,7 +92,7 @@ public class SignPathTest {
     }
 
     @Test
-    public void signOut_shouldReturnTrue_ifSignsOutBeingSignedIn() throws Exception {
+    public void signOut_shouldReturnOk_ifSignsOutBeingSignedIn() throws Exception {
         String emailValue = aRandomEmail();
         assertThat(signUpRequest(emailValue, "pass").code()).isEqualTo(CREATED.getStatusCode());
 
@@ -100,16 +105,28 @@ public class SignPathTest {
         assertThat(signOutRequest.code()).isEqualTo(OK.getStatusCode());
     }
 
-    private HttpRequest signInRequest(String emailValue, String passValue) {
-        return HttpRequest.post(CONTAINER_URL + PATH + "in")
-                .contentType("application/x-www-form-urlencoded")
-                .form(getFormParameters(emailValue, passValue));
+    //TODO CREATE A TEST THAT
+    //SIGNS UP
+    //SIGNS IN
+    //CHECK PROTECTED METHOD - SUCCESS
+    //SIGNS OUT
+    //CHECK PROTECTED METHOD - FAIL
+
+    private String aRandomEmail() {
+        return new Random().nextInt() + "@mail.com";
     }
 
     private HttpRequest signUpRequest(String emailValue, String passValue) {
+        System.out.println(getCredentialsFrom(emailValue, passValue));
         return HttpRequest.put(CONTAINER_URL + PATH + "up")
                 .contentType("application/json")
-                .send(new GsonSerializer().toJson(new Credentials(emailValue, passValue)));
+                .send(getCredentialsFrom(emailValue, passValue));
+    }
+
+    private HttpRequest signInRequest(String emailValue, String passValue) {
+        return HttpRequest.post(CONTAINER_URL + PATH + "in")
+                .contentType("application/json")
+                .send(getCredentialsFrom(emailValue, passValue));
     }
 
     private HttpRequest signOutRequest(String token) {
@@ -119,17 +136,11 @@ public class SignPathTest {
         }
         return HttpRequest.post(CONTAINER_URL + PATH + "out")
                 .contentType("application/x-www-form-urlencoded")
+                .header("Authorization", "Bearer " + token)
                 .form(formParameters);
     }
 
-    private Map<String, String> getFormParameters(String emailValue, String passValue) {
-        Map<String, String> formParameters = new HashMap<>();
-        if (emailValue != null) {
-            formParameters.put("email", emailValue);
-        }
-        if (passValue != null) {
-            formParameters.put("password", passValue);
-        }
-        return formParameters;
+    private String getCredentialsFrom(String emailValue, String passValue) {
+        return new GsonSerializer().toJson(new Credentials(emailValue, passValue));
     }
 }

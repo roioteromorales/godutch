@@ -1,11 +1,11 @@
 package com.roisoftstudio.godutch.login.paths;
 
 import com.google.inject.Inject;
-import com.roisoftstudio.godutch.json.JsonSerializer;
-import com.roisoftstudio.godutch.login.services.InvalidCredentialsException;
-import com.roisoftstudio.godutch.login.services.SignServiceException;
+import com.roisoftstudio.godutch.authentication.Secured;
 import com.roisoftstudio.godutch.login.model.Credentials;
+import com.roisoftstudio.godutch.login.services.InvalidCredentialsException;
 import com.roisoftstudio.godutch.login.services.SignService;
+import com.roisoftstudio.godutch.login.services.SignServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,14 +24,19 @@ public class SignPath {
     @Inject
     private SignService signService;
 
-    @Inject
-    private JsonSerializer jsonSerializer;
-
     @GET
     @Path("/help")
     public Response getHelp() {
         return Response.ok("This is working").build();
     }
+
+    @GET
+    @Secured
+    @Path("/protected")
+    public Response getProtected() {
+        return Response.ok("This is working").build();
+    }
+
 
     @PUT
     @Produces(APPLICATION_JSON)
@@ -47,29 +52,30 @@ public class SignPath {
             logger.error("An error occurred while signing up. ", e);
             return Response.status(CONFLICT).build();
         }
-
     }
 
     @POST
-    @Consumes("application/x-www-form-urlencoded")
+    @Produces(APPLICATION_JSON)
+    @Consumes(APPLICATION_JSON)
     @Path("/in")
-    public Response signIn(@NotNull @FormParam("email") String email, @NotNull @FormParam("password") String password) {
-        checkNotNull(email, "email"); // try to make work @NotNull annotation on param
-        checkNotNull(password, "password");
+    public Response signIn(Credentials credentials) {
+        checkNotNull(credentials.getEmail(), "email"); // try to make work @NotNull annotation on param
+        checkNotNull(credentials.getPassword(), "password");
         try {
-            String token = signService.signIn(email, password);
+            String token = signService.signIn(credentials.getEmail(), credentials.getPassword());
             return Response.ok(token).status(OK).build();
         } catch (SignServiceException e) {
             logger.error("An error occurred while signing in. ", e);
             return Response.status(INTERNAL_SERVER_ERROR).build();
         } catch (InvalidCredentialsException e) {
-            logger.error("Error Unauthorized user: " + email);
+            logger.error("Error Unauthorized user: " + credentials.getEmail());
             return Response.status(UNAUTHORIZED).build();
         }
     }
 
     @POST
     @Path("/out")
+    @Secured
     public Response signOut(@NotNull @FormParam("token") String token) {
         checkNotNull(token, "token"); // try to make work @NotNull annotation on param
         try {
