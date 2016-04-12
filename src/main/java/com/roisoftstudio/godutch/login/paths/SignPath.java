@@ -75,7 +75,7 @@ public class SignPath {
 
     @POST
     @Path("/out")
-    @Secured
+    @Secured//TODO try to use context authorization header instead of parameter
     public Response signOut(@NotNull @FormParam("token") String token) {
         checkNotNull(token, "token"); // try to make work @NotNull annotation on param
         try {
