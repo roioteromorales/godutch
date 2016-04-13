@@ -11,8 +11,11 @@ import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.*;
 
@@ -23,12 +26,6 @@ public class SignPath {
 
     @Inject
     private SignService signService;
-
-    @GET
-    @Path("/help")
-    public Response getHelp() {
-        return Response.ok("This is working").build();
-    }
 
     @GET
     @Secured
@@ -42,15 +39,15 @@ public class SignPath {
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     @Path("/up")
-    public Response signUp(Credentials credentials) {
+    public Response signUp(@NotNull Credentials credentials) {
         checkNotNull(credentials.getEmail(), "email"); // try to make work @NotNull annotation on param
         checkNotNull(credentials.getPassword(), "password");
         try {
             signService.signUp(credentials.getEmail(), credentials.getPassword());
-            return Response.status(CREATED).build();
+            return Response.ok("User created successfully.").status(CREATED).build();
         } catch (SignServiceException e) {
             logger.error("An error occurred while signing up. ", e);
-            return Response.status(CONFLICT).build();
+            return Response.ok("User Already exists.").status(CONFLICT).build();
         }
     }
 
@@ -65,24 +62,25 @@ public class SignPath {
             String token = signService.signIn(credentials.getEmail(), credentials.getPassword());
             return Response.ok(token).status(OK).build();
         } catch (SignServiceException e) {
-            logger.error("An error occurred while signing in. ", e);
-            return Response.status(INTERNAL_SERVER_ERROR).build();
+            String msg = "An error occurred while signing in. ";
+            logger.error(msg, e);
+            return Response.ok(msg + e.getMessage()).status(INTERNAL_SERVER_ERROR).build();
         } catch (InvalidCredentialsException e) {
             logger.error("Error Unauthorized user: " + credentials.getEmail());
-            return Response.status(UNAUTHORIZED).build();
+            return Response.ok("Unauthorized User. ").status(UNAUTHORIZED).build();
         }
     }
 
     @POST
     @Path("/out")
-    @Secured//TODO try to use context authorization header instead of parameter
-    public Response signOut(@NotNull @FormParam("token") String token) {
-        checkNotNull(token, "token"); // try to make work @NotNull annotation on param
+    @Secured
+    public Response signOut(@Context HttpHeaders headers) {
+        String token = headers.getHeaderString(AUTHORIZATION);
         try {
             if (signService.signOut(token)) {
-                return Response.status(OK).build();
+                return Response.ok("Successfully logged out.").status(OK).build();
             } else {
-                return Response.status(UNAUTHORIZED).build();
+                return Response.ok("User cannot log out. Is not signed in.").status(UNAUTHORIZED).build();
             }
         } catch (SignServiceException e) {
             logger.error("An error occurred while signing out. ", e);

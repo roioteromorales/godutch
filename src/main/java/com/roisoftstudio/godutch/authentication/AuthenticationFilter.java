@@ -2,7 +2,6 @@ package com.roisoftstudio.godutch.authentication;
 
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import com.roisoftstudio.godutch.login.paths.SignPath;
 import com.roisoftstudio.godutch.login.services.SignService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,26 +28,21 @@ public class AuthenticationFilter implements ContainerRequestFilter {
 
     @Override
     public void filter(ContainerRequestContext requestContext) throws IOException {
-        // Get the HTTP Authorization header from the request
-        String authorizationHeader = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
-        // Check if the HTTP Authorization header is present and formatted correctly
-        if (authorizationHeader == null || !authorizationHeader.startsWith("Bearer ")) {
-            throw new NotAuthorizedException("Authorization header must be provided");
-        }
-        // Extract the token from the HTTP Authorization header
-        String token = authorizationHeader.substring("Bearer".length()).trim();
+        String token = requestContext.getHeaderString(HttpHeaders.AUTHORIZATION);
         try {
-            // Validate the token
             validateToken(token);
-        } catch (Exception e) {
+        } catch (NotAuthorizedException e) {
             logger.error("Unauthorized Token: [" + token + "]");
-            requestContext.abortWith(
-                    Response.status(Response.Status.UNAUTHORIZED).build());
+            requestContext.abortWith(getUnauthorizedResponse());
         }
     }
 
-    private void validateToken(String token) throws Exception {
-        if (!signService.isSignedIn(token))
-            throw new UnauthorizedException("Invalid Token");
+    private Response getUnauthorizedResponse() {
+        return Response.ok("Unauthorized: Invalid token.").status(Response.Status.UNAUTHORIZED).build();
+    }
+
+    private void validateToken(String token) throws NotAuthorizedException {
+        if (token == null || token.equals("") || !signService.isSignedIn(token))
+            throw new NotAuthorizedException("Invalid Token");
     }
 }
