@@ -30,7 +30,7 @@ public class AppContextListener extends GuiceServletContextListener {
 
         injector = Guice.createInjector(modules);
 
-        JerseyGuiceUtils.install(injector); //todo this shouldnt be here, dunno where. Should run after injector is created.
+        JerseyGuiceUtils.install(injector); //todo this shouldnt be here, dunno where. Should run after injector is  created.
         return injector;
     }
 }
