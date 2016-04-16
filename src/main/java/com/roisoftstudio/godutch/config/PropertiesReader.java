@@ -13,6 +13,7 @@ public class PropertiesReader {
     }
 
     private void initPropertiesFromFile(String propertiesFile) {
+
         String filePath =  Thread.currentThread().getContextClassLoader().getResource(propertiesFile).getFile();
         File file = new File(filePath);
         try (FileInputStream fileInputStream = new FileInputStream(file)) {
