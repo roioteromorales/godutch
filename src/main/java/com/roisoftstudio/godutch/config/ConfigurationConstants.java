@@ -6,7 +6,7 @@ public class ConfigurationConstants {
     static {
         System.out.println("STATIC");
 
-        if (System.getenv("GODUTCH_DEV") != null) {
+        if (System.getenv("GODUTCH_DEV").equals("1")) {
             CONFIG_FILE_NAME = "config.dev.properties";
             System.out.println("STATIC - VAR " + CONFIG_FILE_NAME);
         }
