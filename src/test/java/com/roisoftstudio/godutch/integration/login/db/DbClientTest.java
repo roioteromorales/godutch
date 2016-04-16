@@ -4,12 +4,14 @@ import com.mongodb.client.FindIterable;
 import com.mongodb.client.MongoCollection;
 import com.roisoftstudio.godutch.db.DbClient;
 import org.bson.Document;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class DbClientTest {
 
+    @Ignore
     @Test
     public void canCreateOneDocumentAndReadIt() throws Exception {
         DbClient dbClient = new DbClient();
