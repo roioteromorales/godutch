@@ -6,11 +6,13 @@ public class ConfigurationConstants {
     static {
         System.out.println("STATIC");
 
-        if (System.getenv("GODUTCH_DEV").equals("1")) {
+        String isDev = System.getenv("GODUTCH_DEV");
+        if (isDev != null && isDev.equals("1")) {
             CONFIG_FILE_NAME = "config.dev.properties";
             System.out.println("STATIC - VAR " + CONFIG_FILE_NAME);
         }
     }
+
     public static PropertiesReader propertiesReader = new PropertiesReader(CONFIG_FILE_NAME);
 
     public static final String PROTOCOL = propertiesReader.getValue("webProtocol");
