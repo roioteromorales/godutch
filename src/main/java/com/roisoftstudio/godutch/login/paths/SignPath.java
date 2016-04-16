@@ -15,6 +15,7 @@ import javax.ws.rs.core.Context;
 import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
 
+import static com.roisoftstudio.godutch.config.ConfigurationConstants.DOCKER_IP;
 import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 import static javax.ws.rs.core.Response.Status.*;
@@ -44,10 +45,10 @@ public class SignPath {
         checkNotNull(credentials.getPassword(), "password");
         try {
             signService.signUp(credentials.getEmail(), credentials.getPassword());
-            return Response.ok("User created successfully.").status(CREATED).build();
+            return Response.ok("Account created successfully.").status(CREATED).build();
         } catch (SignServiceException e) {
             logger.error("An error occurred while signing up. ", e);
-            return Response.ok("User Already exists.").status(CONFLICT).build();
+            return Response.ok("Account Already exists.").status(CONFLICT).build();
         }
     }
 
@@ -66,8 +67,8 @@ public class SignPath {
             logger.error(msg, e);
             return Response.ok(msg + e.getMessage()).status(INTERNAL_SERVER_ERROR).build();
         } catch (InvalidCredentialsException e) {
-            logger.error("Error Unauthorized user: " + credentials.getEmail());
-            return Response.ok("Unauthorized User. ").status(UNAUTHORIZED).build();
+            logger.error("Error Unauthorized account: " + credentials.getEmail());
+            return Response.ok("Unauthorized Account. ").status(UNAUTHORIZED).build();
         }
     }
 
@@ -80,7 +81,7 @@ public class SignPath {
             if (signService.signOut(token)) {
                 return Response.ok("Successfully logged out.").status(OK).build();
             } else {
-                return Response.ok("User cannot log out. Is not signed in.").status(UNAUTHORIZED).build();
+                return Response.ok("Account cannot log out. Is not signed in.").status(UNAUTHORIZED).build();
             }
         } catch (SignServiceException e) {
             logger.error("An error occurred while signing out. ", e);

@@ -2,7 +2,10 @@ package com.roisoftstudio.godutch.integration.login;
 
 import com.github.kevinsawicki.http.HttpRequest;
 import com.roisoftstudio.godutch.json.GsonSerializer;
+import com.roisoftstudio.godutch.login.model.Account;
 import com.roisoftstudio.godutch.login.model.Credentials;
+
+import java.util.Random;
 
 import static com.roisoftstudio.godutch.config.ConfigurationConstants.CONTAINER_URL;
 
@@ -27,6 +30,19 @@ public class LoginHelpers {
                 .contentType("application/json")
                 .header("Authorization", token);
     }
+
+    public static Account aRandomAccount() {
+        return new Account(aRandomEmail(), aRandomPassword());
+    }
+
+    public static String aRandomEmail() {
+        return new Random().nextInt() + "@mail.com";
+    }
+
+    private static String aRandomPassword() {
+        return "pass" + new Random().nextInt();
+    }
+
 
     public static String getCredentialsFrom(String emailValue, String passValue) {
         return new GsonSerializer().toJson(new Credentials(emailValue, passValue));

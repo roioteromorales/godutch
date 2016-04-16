@@ -1,6 +1,7 @@
 package com.roisoftstudio.godutch.integration.login.paths;
 
 import com.github.kevinsawicki.http.HttpRequest;
+import com.roisoftstudio.godutch.integration.login.LoginHelpers;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -34,7 +35,7 @@ public class SignPathTest {
     }
 
     @Test
-    public void signUp_shouldCreateAnUser() throws Exception {
+    public void signUp_shouldCreateAnAccount() throws Exception {
         HttpRequest signUpRequest = signUpRequest(aRandomEmail(), "pass");
         assertThat(signUpRequest.code()).isEqualTo(CREATED.getStatusCode());
     }
@@ -47,6 +48,7 @@ public class SignPathTest {
 
         HttpRequest signUpRequest2 = signUpRequest(emailValue, "pass");
         assertThat(signUpRequest2.code()).isEqualTo(CONFLICT.getStatusCode());
+        //TODO THIS FAILS WITH MONGO BECAUSE WE NEED TO CREATE THE PRIMARY KEY UNIQUE ON EMAIL.
     }
 
     @Test
@@ -92,9 +94,6 @@ public class SignPathTest {
         assertThat(signOutRequest.code()).isEqualTo(OK.getStatusCode());
     }
 
-    private String aRandomEmail() {
-        return new Random().nextInt() + "@mail.com";
-    }
 
 
 }
