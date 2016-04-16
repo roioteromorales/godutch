@@ -13,7 +13,6 @@ import static com.roisoftstudio.godutch.integration.login.LoginHelpers.aRandomAc
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
 
-@Ignore
 public class MongoDaoTest {
 
 
@@ -36,6 +35,7 @@ public class MongoDaoTest {
         assertThat(mongoDbAccountDao.contains(account)).isTrue();
     }
 
+    @Ignore //TODO To fix this we need to create a primary key in the mongo db
     @Test
     public void whenInsertingTwiceTheSameAccount_dbShouldThrowException() throws Exception {
         Account account = aRandomAccount();
@@ -44,4 +44,6 @@ public class MongoDaoTest {
         assertThatExceptionOfType(AccountAlreadyExistsException.class)
                 .isThrownBy(() ->  mongoDbAccountDao.addAccount(account));
     }
+
+
 }

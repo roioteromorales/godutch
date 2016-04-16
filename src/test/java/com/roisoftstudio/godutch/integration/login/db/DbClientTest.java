@@ -11,7 +11,6 @@ import static org.assertj.core.api.AssertionsForInterfaceTypes.assertThat;
 
 public class DbClientTest {
 
-    @Ignore
     @Test
     public void canCreateOneDocumentAndReadIt() throws Exception {
         DbClient dbClient = new DbClient();
