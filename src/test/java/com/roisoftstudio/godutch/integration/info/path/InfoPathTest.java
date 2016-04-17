@@ -5,6 +5,7 @@ import com.google.gson.Gson;
 import com.roisoftstudio.godutch.info.model.InfoModel;
 import org.junit.Test;
 
+import static com.roisoftstudio.godutch.config.ConfigurationConstants.CONFIG_FILE_NAME;
 import static com.roisoftstudio.godutch.config.ConfigurationConstants.CONTAINER_URL;
 import static org.assertj.core.api.Assertions.assertThat;
 

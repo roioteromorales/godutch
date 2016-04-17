@@ -13,4 +13,10 @@ public class PropertiesReaderTest {
         assertThat(propertiesReader.getValue("testVariable"), is("testValue"));
         assertThat(propertiesReader.getValue("testVariable2"), is("testValue2"));
     }
+
+    @Test
+    public void name() throws Exception {
+        System.out.println(ConfigurationConstants.DOCKER_IP);
+
+    }
 }

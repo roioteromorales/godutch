@@ -1,13 +1,24 @@
 package com.roisoftstudio.godutch.config;
 
 public class ConfigurationConstants {
-    public static final String CONFIG_FILE_NAME = "config.properties";
-    public static PropertiesReader propertiesReader = new PropertiesReader(CONFIG_FILE_NAME);
-    public static final String PORT = propertiesReader.getValue("port");
+    public static String CONFIG_FILE_NAME = "config.properties";
 
-    public static final String DOCKER_HOST = System.getenv("DOCKER_HOST");
-    public static final String CONTAINER_URL = DOCKER_HOST
-            .replace("tcp", "http")
-            .subSequence(0, DOCKER_HOST.length() - 3) + PORT + "/";
+    static {
+        System.out.println("STATIC");
+
+        String isDev = System.getenv("GODUTCH_DEV");
+        if (isDev != null && isDev.equals("1")) {
+            CONFIG_FILE_NAME = "config.dev.properties";
+            System.out.println("STATIC - VAR " + CONFIG_FILE_NAME);
+        }
+    }
+
+    public static PropertiesReader propertiesReader = new PropertiesReader(CONFIG_FILE_NAME);
+
+    public static final String PROTOCOL = propertiesReader.getValue("webProtocol");
+    public static final String DOCKER_IP = propertiesReader.getValue("ip");
+    public static final String PORT = propertiesReader.getValue("webPort");
+
+    public static final String CONTAINER_URL = PROTOCOL + "://" + DOCKER_IP + ":" + PORT + "/";
 
 }

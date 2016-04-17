@@ -1,4 +1,4 @@
-package com.roisoftstudio.godutch.login.exceptions;
+package com.roisoftstudio.godutch.login.services;
 
 public class SignServiceException extends Exception {
     public SignServiceException(String message, Throwable cause) {
