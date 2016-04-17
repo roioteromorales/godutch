@@ -1,80 +1,97 @@
 package com.roisoftstudio.godutch.login.paths;
 
 import com.google.inject.Inject;
-import com.roisoftstudio.godutch.json.JsonSerializer;
-import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
-import com.roisoftstudio.godutch.login.model.JsonResponse;
+import com.roisoftstudio.godutch.authentication.Secured;
+import com.roisoftstudio.godutch.login.model.Credentials;
+import com.roisoftstudio.godutch.login.services.InvalidCredentialsException;
 import com.roisoftstudio.godutch.login.services.SignService;
+import com.roisoftstudio.godutch.login.services.SignServiceException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import javax.validation.constraints.NotNull;
 import javax.ws.rs.*;
+import javax.ws.rs.core.Context;
+import javax.ws.rs.core.HttpHeaders;
 import javax.ws.rs.core.Response;
+
+import static com.roisoftstudio.godutch.config.ConfigurationConstants.DOCKER_IP;
+import static javax.ws.rs.core.HttpHeaders.AUTHORIZATION;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.Response.Status.*;
 
 
 @Path("/sign")
 public class SignPath {
-    final Logger logger = LoggerFactory.getLogger(SignPath.class);
+    private final Logger logger = LoggerFactory.getLogger(SignPath.class);
 
     @Inject
     private SignService signService;
 
-    @Inject
-    private JsonSerializer jsonSerializer;
-
     @GET
-    @Path("/help")
-    public Response getHelp() {
+    @Secured
+    @Path("/protected")
+    public Response getProtected() {
         return Response.ok("This is working").build();
     }
 
+
     @PUT
-    @Consumes("application/x-www-form-urlencoded")
+    @Produces(APPLICATION_JSON)
+    @Consumes(APPLICATION_JSON)
     @Path("/up")
-    public Response signUp(@NotNull @FormParam("email") String email, @NotNull @FormParam("password") String password) {
-        checkNotNull(email, "email"); // try to make work @NotNull annotation on param
-        checkNotNull(password, "password");
-        String token;
+    public Response signUp(@NotNull Credentials credentials) {
+        checkNotNull(credentials.getEmail(), "email"); // try to make work @NotNull annotation on param
+        checkNotNull(credentials.getPassword(), "password");
         try {
-            token = signService.signUp(getOrDefault(email), getOrDefault(password));
+            signService.signUp(credentials.getEmail(), credentials.getPassword());
+            return Response.ok("Account created successfully.").status(CREATED).build();
         } catch (SignServiceException e) {
-            logger.error("An error occurred while signing in. ", e);
-            return Response.status(Response.Status.CONFLICT).build();
+            logger.error("An error occurred while signing up. ", e);
+            return Response.ok("Account Already exists.").status(CONFLICT).build();
         }
-        String jsonResponse = jsonSerializer.toJson(new JsonResponse("Email: " + email + "\n" +
-                "password: " + password + "\n" +
-                "Registered Successfully. Your session token is: " + token));
-
-        return Response.ok(jsonResponse).build();
-
-    }
-
-    //find out @default value for parameters annotation to remove this
-    private String getOrDefault(String string) {
-        return string != null ? string : "DEFAULTVALUE";
     }
 
     @POST
+    @Produces(APPLICATION_JSON)
+    @Consumes(APPLICATION_JSON)
     @Path("/in")
-    public Response signIn(@FormParam("token") String token) {
-        if (signService.isSignedIn(token)) {
-            return Response.ok("You are Signed in.").build();
-        } else {
-            return Response.ok("Your token is invalid: " + token).build();
+    public Response signIn(Credentials credentials) {
+        checkNotNull(credentials.getEmail(), "email"); // try to make work @NotNull annotation on param
+        checkNotNull(credentials.getPassword(), "password");
+        try {
+            String token = signService.signIn(credentials.getEmail(), credentials.getPassword());
+            return Response.ok(token).status(OK).build();
+        } catch (SignServiceException e) {
+            String msg = "An error occurred while signing in. ";
+            logger.error(msg, e);
+            return Response.ok(msg + e.getMessage()).status(INTERNAL_SERVER_ERROR).build();
+        } catch (InvalidCredentialsException e) {
+            logger.error("Error Unauthorized account: " + credentials.getEmail());
+            return Response.ok("Unauthorized Account. ").status(UNAUTHORIZED).build();
         }
-
     }
 
-    @GET
+    @POST
     @Path("/out")
-    public Response signOut() {
-        return Response.ok("Sign Out").build();
+    @Secured
+    public Response signOut(@Context HttpHeaders headers) {
+        String token = headers.getHeaderString(AUTHORIZATION);
+        try {
+            if (signService.signOut(token)) {
+                return Response.ok("Successfully logged out.").status(OK).build();
+            } else {
+                return Response.ok("Account cannot log out. Is not signed in.").status(UNAUTHORIZED).build();
+            }
+        } catch (SignServiceException e) {
+            logger.error("An error occurred while signing out. ", e);
+            return Response.status(INTERNAL_SERVER_ERROR).build();
+        }
     }
 
 
     private void checkNotNull(String parameter, String parameterName) {
-        if (parameter == null) {
+        if (parameter == null || parameter.equals("")) {
             throw new BadRequestException("Required parameter was null: " + parameterName);
         }
     }

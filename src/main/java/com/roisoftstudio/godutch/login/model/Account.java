@@ -1,10 +1,12 @@
 package com.roisoftstudio.godutch.login.model;
 
-public class User {
+import com.roisoftstudio.godutch.Model;
+
+public class Account implements Model {
     private final String email;
     private final String password;
 
-    public User(String email, String password) {
+    public Account(String email, String password) {
         this.email = email;
         this.password = password;
     }
@@ -18,10 +20,10 @@ public class User {
         if (this == o) return true;
         if (o == null || getClass() != o.getClass()) return false;
 
-        User user = (User) o;
+        Account account = (Account) o;
 
-        if (email != null ? !email.equals(user.email) : user.email != null) return false;
-        return !(password != null ? !password.equals(user.password) : user.password != null);
+        if (email != null ? !email.equals(account.email) : account.email != null) return false;
+        return !(password != null ? !password.equals(account.password) : account.password != null);
 
     }
 

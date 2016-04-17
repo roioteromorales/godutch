@@ -1,10 +1,9 @@
 package com.roisoftstudio.godutch.login.services;
 
-import com.roisoftstudio.godutch.login.exceptions.SignServiceException;
-
 public interface SignService {
 
-    String signUp(String email, String password) throws SignServiceException;
-
+    void signUp(String email, String password) throws SignServiceException;
+    String signIn(String email, String password) throws SignServiceException, InvalidCredentialsException;
+    boolean signOut(String token) throws SignServiceException;
     boolean isSignedIn(String token);
 }
