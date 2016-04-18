@@ -1,6 +1,7 @@
 package com.roisoftstudio.godutch.integration.login.paths;
 
 import com.github.kevinsawicki.http.HttpRequest;
+import org.json.JSONObject;
 import org.junit.Ignore;
 import org.junit.Test;
 
@@ -86,7 +87,7 @@ public class SignPathTest {
         HttpRequest signInResponse = signInRequest(emailValue, "pass");
         assertThat(signInResponse.code()).isEqualTo(OK.getStatusCode());
 
-        String token = responseParamsToJSON(signInResponse).getString("token");
+        String token = new JSONObject(signInResponse.body()).getString("token");
         HttpRequest signOutRequest = signOutRequest(token);
         assertThat(signOutRequest.code()).isEqualTo(OK.getStatusCode());
     }

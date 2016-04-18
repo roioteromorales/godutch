@@ -32,10 +32,6 @@ public class LoginHelpers {
                 .header("Authorization", token);
     }
 
-    public static JSONObject responseParamsToJSON(final HttpRequest request) {
-        return new JSONObject(request.body());
-    }
-
     public static Account aRandomAccount() {
         return new Account(aRandomEmail(), aRandomPassword());
     }
