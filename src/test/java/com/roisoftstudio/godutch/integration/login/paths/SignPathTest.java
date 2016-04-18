@@ -1,11 +1,8 @@
 package com.roisoftstudio.godutch.integration.login.paths;
 
 import com.github.kevinsawicki.http.HttpRequest;
-import com.roisoftstudio.godutch.integration.login.LoginHelpers;
 import org.junit.Ignore;
 import org.junit.Test;
-
-import java.util.Random;
 
 import static com.roisoftstudio.godutch.config.ConfigurationConstants.CONTAINER_URL;
 import static com.roisoftstudio.godutch.integration.login.LoginHelpers.*;
@@ -89,7 +86,7 @@ public class SignPathTest {
         HttpRequest signInResponse = signInRequest(emailValue, "pass");
         assertThat(signInResponse.code()).isEqualTo(OK.getStatusCode());
 
-        String token = signInResponse.body();
+        String token = responseParamsToJSON(signInResponse).getString("token");
         HttpRequest signOutRequest = signOutRequest(token);
         assertThat(signOutRequest.code()).isEqualTo(OK.getStatusCode());
     }

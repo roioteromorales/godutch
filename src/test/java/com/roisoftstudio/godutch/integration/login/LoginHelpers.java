@@ -4,6 +4,7 @@ import com.github.kevinsawicki.http.HttpRequest;
 import com.roisoftstudio.godutch.json.GsonSerializer;
 import com.roisoftstudio.godutch.login.model.Account;
 import com.roisoftstudio.godutch.login.model.Credentials;
+import org.json.JSONObject;
 
 import java.util.Random;
 
@@ -29,6 +30,10 @@ public class LoginHelpers {
         return HttpRequest.post(CONTAINER_URL + PATH + "out")
                 .contentType("application/json")
                 .header("Authorization", token);
+    }
+
+    public static JSONObject responseParamsToJSON(final HttpRequest request) {
+        return new JSONObject(request.body());
     }
 
     public static Account aRandomAccount() {
