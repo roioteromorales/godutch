@@ -13,6 +13,11 @@ public abstract class Response {
     @JsonProperty
     protected String message;
 
+    public Response () {
+        this.status = Status.NO_CONTENT;
+        this.message = Status.NO_CONTENT.getReasonPhrase();
+    }
+
     public Response(final String message, final Status code) {
         this.status = code;
         this.message = message;

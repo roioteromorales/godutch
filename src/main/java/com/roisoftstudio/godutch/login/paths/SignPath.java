@@ -8,6 +8,7 @@ import com.roisoftstudio.godutch.login.model.Credentials;
 import com.roisoftstudio.godutch.login.services.InvalidCredentialsException;
 import com.roisoftstudio.godutch.login.services.SignService;
 import com.roisoftstudio.godutch.login.services.SignServiceException;
+import com.roisoftstudio.godutch.responses.ResponseToken;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -63,7 +64,7 @@ public class SignPath {
         checkNotNull(credentials.getPassword(), "password");
         try {
             String token = signService.signIn(credentials.getEmail(), credentials.getPassword());
-            return Response.ok(token).build();
+            return Response.ok(new ResponseToken(token)).build();
         } catch (final SignServiceException e) {
             String msg = "An error occurred while signing in. ";
             logger.error(msg, e);
