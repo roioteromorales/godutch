@@ -46,11 +46,6 @@ public class SignPath {
         checkNotNull(credentials.getPassword(), "password");
         try {
             signService.signUp(credentials.getEmail(), credentials.getPassword());
-          /*
-            Now returns this {status: CREATED, message:"Account created..."}
-            But i think its better return only HTTP code if its OK
-            And if an error has occurred, return HTTP + message (with ResponseError)
-          */
             return Response
                     .ok(new ResponseSucceed("Account created successfully.", CREATED))
                     .status(CREATED)
@@ -78,7 +73,7 @@ public class SignPath {
                     .build();
         } catch (final InvalidCredentialsException e) {
             logger.error("Error Unauthorized account: " + credentials.getEmail());
-            return Response.ok(new ResponseError(e.getMessage(), UNAUTHORIZED)).status(UNAUTHORIZED).build();
+            return Response.status(UNAUTHORIZED).entity(new ResponseError(e.getMessage(), UNAUTHORIZED)).build();
         }
     }
 

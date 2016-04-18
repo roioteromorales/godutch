@@ -18,8 +18,6 @@ public class InfoPath {
 
     @GET
     public Response getInfo() {
-        return Response
-                .ok(infoService.getInfo())
-                .build();
+        return Response.ok(infoService.getInfo()).build();
     }
 }
